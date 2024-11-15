@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once 'templates/header.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     require_once 'config/database.php';
@@ -23,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
+   <link rel="stylesheet" href="/Projet%20PHP/css/login.css">
 <div class="login-container">
     <h1>Connexion</h1>
     <?php if (isset($error)): ?>
@@ -41,6 +40,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <button type="submit" class="btn-submit">Se connecter</button>
     </form>
+    <div class="signup-link">
+        <p>Pas encore de compte ? <a href="signup.php">S'inscrire</a></p>
+    </div>
 </div>
 
 <?php require_once 'templates/footer.php'; ?>
