@@ -14,26 +14,51 @@ if (!$id) {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    ob_clean();
+    header('Content-Type: application/json');
+    
+    try {
+        $success = false;
+        $type = $_GET['type'] ?? '';
+        
+        switch ($type) {
+            case 'statut':
+                $success = modifierStatutJoueur($pdo, $id, ['statut' => $_POST['statut']]);
+                break;
+            case 'poste':
+                $success = modifierJoueur($pdo, $id, ['poste_prefere' => $_POST['poste_prefere']]);
+                break;
+            case 'commentaires':
+                $success = modifierJoueur($pdo, $id, ['commentaires' => $_POST['commentaires']]);
+                break;
+            case 'infos':
+                $success = modifierJoueur($pdo, $id, $_POST);
+                break;
+            default:
+                throw new Exception('Type de modification invalide');
+        }
+        
+        if ($success) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Échec de la modification']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Si ce n'est pas une requête AJAX, on charge le joueur pour l'affichage du formulaire
 $joueur = getJoueurById($pdo, $id);
 if (!$joueur) {
     header('Location: liste.php');
     exit();
 }
 
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        if (modifierJoueur($pdo, $id, $_POST)) {
-            header('Location: liste.php');
-            exit();
-        }
-    } catch (PDOException $e) {
-        $message = "Erreur lors de la modification du joueur: " . $e->getMessage();
-    }
-}
+// Si ce n'est pas une requête POST, afficher le formulaire HTML normal
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>

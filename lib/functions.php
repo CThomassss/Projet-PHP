@@ -36,18 +36,34 @@ function modifierJoueur($pdo, $id, $data) {
             taille = ?, poids = ?, statut = ?, commentaires = ?, poste_prefere = ? 
             WHERE id = ?";
     $stmt = $pdo->prepare($sql);
-    return $stmt->execute([
-        $data['nom'],
-        $data['prenom'],
-        $data['numero_licence'],
-        $data['date_naissance'],
-        $data['taille'],
-        $data['poids'],
-        $data['statut'],
-        $data['commentaires'],
-        $data['poste_prefere'],
-        $id
-    ]);
+    try {
+        return $stmt->execute([
+            $data['nom'] ?? null,
+            $data['prenom'] ?? null,
+            $data['numero_licence'] ?? null,
+            $data['date_naissance'] ?? null,
+            $data['taille'] ?? null,
+            $data['poids'] ?? null,
+            $data['statut'] ?? null,
+            $data['commentaires'] ?? null,
+            $data['poste_prefere'] ?? null,
+            $id
+        ]);
+    } catch (PDOException $e) {
+        error_log("Erreur SQL: " . $e->getMessage());
+        return false;
+    }
+}
+
+function modifierStatutJoueur($pdo, $id, $data) {
+    $sql = "UPDATE joueurs SET statut = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    try {
+        return $stmt->execute([$data['statut'], $id]);
+    } catch (PDOException $e) {
+        error_log("Erreur SQL: " . $e->getMessage());
+        return false;
+    }
 }
 
 function supprimerJoueur($pdo, $id) {

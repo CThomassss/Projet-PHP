@@ -1,3 +1,29 @@
+<?php
+
+require_once 'config/database.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
+        // Sécurisation des données
+        $nom_utilisateur = htmlspecialchars($_POST["username"]);
+        $email = htmlspecialchars($_POST["email"]);
+        $mot_de_passe = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+        // Modification de la requête pour correspondre aux noms des colonnes
+        $stmt = $conn->prepare("INSERT INTO utilisateurs (nom_utilisateur, email, mot_de_passe) VALUES (:nom_utilisateur, :email, :mot_de_passe)");
+        $stmt->bindParam(':nom_utilisateur', $nom_utilisateur);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':mot_de_passe', $mot_de_passe);
+        $stmt->execute();
+
+        echo "<script>alert('Inscription réussie!');</script>";
+        header("location: login.php");
+    } catch(PDOException $e) {
+        echo "<script>alert('Erreur: " . $e->getMessage() . "');</script>";
+    }
+    $conn = null;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
