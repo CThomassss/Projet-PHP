@@ -1,6 +1,18 @@
 <?php
-require_once 'config/database.php';
-require_once 'lib/functions.php';
+session_start();
+
+// Debug de session
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Vérifier si la session existe
+if (!isset($_SESSION['utilisateur_id'])) {
+    header('Location: ./login.php');
+    exit();
+}
+
+require_once './config/database.php';
+require_once './lib/functions.php';
 
 $joueurs = getJoueurs($pdo);
 ?>
@@ -38,10 +50,10 @@ $joueurs = getJoueurs($pdo);
                         <td><?= htmlspecialchars($joueur['prenom']) ?></td>
                         <td><?= htmlspecialchars($joueur['numero_licence']) ?></td>
                         <td><?= htmlspecialchars($joueur['date_naissance']) ?></td>
-                        <td><?= htmlspecialchars($joueur['taille']) ?> cm</td>
-                        <td><?= htmlspecialchars($joueur['poids']) ?> kg</td>
+                        <td><?= htmlspecialchars((string)($joueur['taille'] ?? '')) ?> cm</td>
+                        <td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
                         <td><?= htmlspecialchars($joueur['statut']) ?></td>
-                        <td><?= htmlspecialchars($joueur['poste_prefere']) ?></td>
+                        <td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
                         <td>
                             <button onclick="afficherMenu(<?= $joueur['id'] ?>)" class="btn btn-secondary">Modifier</button>
                             <a href="joueurs/supprimer.php?id=<?= $joueur['id'] ?>" class="btn btn-danger">Supprimer</a>
@@ -214,37 +226,59 @@ $joueurs = getJoueurs($pdo);
             `;
         }
 
+        function checkSession() {
+            return fetch('check_session.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.logged_in) {
+                        window.location.href = 'login.php';
+                        return false;
+                    }
+                    return true;
+                });
+        }
+
         function sauvegarderModifications(event, type) {
             event.preventDefault();
-            const joueurId = document.getElementById('menuModification').dataset.joueurId;
-            const formData = new FormData(event.target);
             
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `joueurs/modifier.php?id=${joueurId}&type=${type}`, true);
-            
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            window.location.reload();
-                        } else {
-                            alert(response.message || 'Erreur lors de la sauvegarde');
-                        }
-                    } catch (e) {
-                        console.error('Réponse serveur:', xhr.responseText);
-                        alert('Erreur lors du traitement de la réponse');
+            // Vérifier la session avant d'envoyer la requête
+            checkSession().then(sessionValid => {
+                if (!sessionValid) return;
+                
+                const joueurId = document.getElementById('menuModification').dataset.joueurId;
+                const formData = new FormData(event.target);
+                
+                fetch(`joueurs/modifier.php?id=${joueurId}&type=${type}`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin' // Important pour envoyer les cookies de session
+                })
+                .then(async response => {
+                    const text = await response.text();
+                    if (text.includes('login-container')) {
+                        window.location.href = 'login.php';
+                        throw new Error('Session expirée');
                     }
-                } else {
-                    alert('Erreur lors de la requête: ' + xhr.status);
-                }
-            };
-            
-            xhr.onerror = function() {
-                alert('Erreur de connexion au serveur');
-            };
-            
-            xhr.send(formData);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('Réponse invalide du serveur');
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Erreur lors de la sauvegarde');
+                    }
+                })
+                .catch(error => {
+                    if (error.message !== 'Session expirée') {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la sauvegarde: ' + error.message);
+                    }
+                });
+            });
         }
 
         window.addEventListener('resize', () => {

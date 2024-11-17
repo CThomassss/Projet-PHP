@@ -1,56 +1,119 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['utilisateur_id'])) {
-    header('Location: ../login.php');
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'message' => 'Session expirée',
+            'redirect' => '../login.php'
+        ]);
+    } else {
+        header('Location: ../login.php');
+    }
     exit();
 }
 
 require_once '../config/database.php';
 require_once '../lib/functions.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // S'assurer qu'il n'y a pas de sortie avant
+    if (ob_get_length()) ob_clean();
+    
+    header('Content-Type: application/json');
+    header('Cache-Control: no-cache, must-revalidate');
+    
+    try {
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$id) {
+            throw new Exception('ID invalide');
+        }
+
+        $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_STRING);
+        $data = array_map('trim', $_POST);
+        $success = false;
+
+        switch ($type) {
+            case 'statut':
+                // Ne mettre à jour que le statut
+                $sql = "UPDATE joueurs SET statut = :statut WHERE id = :id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':statut' => $_POST['statut'],
+                    ':id' => $id
+                ]);
+                $success = true;
+                break;
+            case 'poste':
+                // Ne mettre à jour que le poste
+                $sql = "UPDATE joueurs SET poste_prefere = :poste WHERE id = :id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':poste' => $_POST['poste_prefere'],
+                    ':id' => $id
+                ]);
+                $success = true;
+                break;
+            case 'commentaires':
+                // Ne mettre à jour que les commentaires
+                $sql = "UPDATE joueurs SET commentaires = :commentaires WHERE id = :id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':commentaires' => $_POST['commentaires'],
+                    ':id' => $id
+                ]);
+                $success = true;
+                break;
+            case 'infos':
+                // Mise à jour des informations générales
+                $sql = "UPDATE joueurs SET 
+                    nom = :nom,
+                    prenom = :prenom,
+                    numero_licence = :numero_licence,
+                    date_naissance = :date_naissance,
+                    taille = :taille,
+                    poids = :poids
+                    WHERE id = :id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':nom' => $_POST['nom'],
+                    ':prenom' => $_POST['prenom'],
+                    ':numero_licence' => $_POST['numero_licence'],
+                    ':date_naissance' => $_POST['date_naissance'],
+                    ':taille' => $_POST['taille'],
+                    ':poids' => $_POST['poids'],
+                    ':id' => $id
+                ]);
+                $success = true;
+                break;
+            default:
+                throw new Exception('Type de modification invalide');
+        }
+
+        echo json_encode([
+            'success' => $success,
+            'message' => $success ? 'Modification réussie' : 'Échec de la modification'
+        ]);
+
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+    exit();
+}
+
+// Si ce n'est pas une requête AJAX, on charge le joueur pour l'affichage du formulaire
 $id = $_GET['id'] ?? null;
 if (!$id) {
     header('Location: liste.php');
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    ob_clean();
-    header('Content-Type: application/json');
-    
-    try {
-        $success = false;
-        $type = $_GET['type'] ?? '';
-        
-        switch ($type) {
-            case 'statut':
-                $success = modifierStatutJoueur($pdo, $id, ['statut' => $_POST['statut']]);
-                break;
-            case 'poste':
-                $success = modifierJoueur($pdo, $id, ['poste_prefere' => $_POST['poste_prefere']]);
-                break;
-            case 'commentaires':
-                $success = modifierJoueur($pdo, $id, ['commentaires' => $_POST['commentaires']]);
-                break;
-            case 'infos':
-                $success = modifierJoueur($pdo, $id, $_POST);
-                break;
-            default:
-                throw new Exception('Type de modification invalide');
-        }
-        
-        if ($success) {
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Échec de la modification']);
-        }
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    }
-    exit;
-}
-
-// Si ce n'est pas une requête AJAX, on charge le joueur pour l'affichage du formulaire
 $joueur = getJoueurById($pdo, $id);
 if (!$joueur) {
     header('Location: liste.php');

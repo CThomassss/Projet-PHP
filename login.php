@@ -1,27 +1,41 @@
 <?php
-require_once 'config/database.php';
 session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['nom_utilisateur'];
-    $password = $_POST['mot_de_passe'];
-    
-    $sql = "SELECT * FROM utilisateurs WHERE nom_utilisateur = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-    
-    if ($user && password_verify($password, $user['mot_de_passe'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['nom_utilisateur'];
-        header('Location: home.php');
-        exit();
-    } else {
-        $error = "Nom d'utilisateur ou mot de passe incorrect";
+// Debug de session
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once './config/database.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nom_utilisateur = $_POST['nom_utilisateur'] ?? '';
+    $mot_de_passe = $_POST['mot_de_passe'] ?? '';
+
+    try {
+        $stmt = $pdo->prepare("SELECT id, mot_de_passe FROM utilisateurs WHERE nom_utilisateur = ?");
+        $stmt->execute([$nom_utilisateur]);
+        $utilisateur = $stmt->fetch();
+
+        if ($utilisateur && password_verify($mot_de_passe, $utilisateur['mot_de_passe'])) {
+            // Démarrer une nouvelle session propre
+            session_regenerate_id(true);
+            $_SESSION['utilisateur_id'] = $utilisateur['id'];
+            
+            // Debug
+            error_log("Session créée pour l'utilisateur ID: " . $utilisateur['id']);
+            
+            // Rediriger vers joueurs.php au lieu de index.php
+            header('Location: ./joueurs.php');
+            exit();
+        } else {
+            $error = "Identifiants invalides";
+        }
+    } catch (PDOException $e) {
+        $error = "Erreur de connexion";
+        error_log($e->getMessage());
     }
 }
 ?>
-
 
 <link rel="stylesheet" href="/Projet%20PHP/css/login.css">
 <div class="login-container">
