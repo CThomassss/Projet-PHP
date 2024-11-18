@@ -24,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Debug
             error_log("Session créée pour l'utilisateur ID: " . $utilisateur['id']);
             
-            // Rediriger vers joueurs.php au lieu de index.php
-            header('Location: ./joueurs.php');
+            // Redirection vers home.php
+            header('Location: ./home.php');
             exit();
         } else {
             $error = "Identifiants invalides";

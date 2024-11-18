@@ -1,50 +1,33 @@
 <?php
 session_start();
 if (!isset($_SESSION['utilisateur_id'])) {
-    header('Location: ../login.php');
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Non autorisé']);
     exit();
 }
 
 require_once '../config/database.php';
-require_once '../lib/functions.php';
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    header('Location: liste.php');
-    exit();
-}
+// Simplifier la vérification pour accepter à la fois GET et POST
+$id = $_GET['id'] ?? $_POST['id'] ?? null;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($id) {
     try {
-        if (supprimerJoueur($pdo, $id)) {
-            header('Location: liste.php');
-            exit();
+        $stmt = $pdo->prepare("DELETE FROM joueurs WHERE id = ?");
+        $success = $stmt->execute([intval($id)]);
+
+        header('Content-Type: application/json');
+        if ($success) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de la suppression']);
         }
     } catch (PDOException $e) {
-        $message = "Erreur lors de la suppression du joueur: " . $e->getMessage();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-}
-
-$joueur = getJoueurById($pdo, $id);
-if (!$joueur) {
-    header('Location: liste.php');
-    exit();
+} else {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'ID manquant']);
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Supprimer un joueur</title>
-</head>
-<body>
-    <h1>Supprimer un joueur</h1>
-    <p>Êtes-vous sûr de vouloir supprimer le joueur <?= htmlspecialchars($joueur['prenom'] . ' ' . $joueur['nom']) ?> ?</p>
-    
-    <form method="POST">
-        <button type="submit">Oui, supprimer</button>
-        <a href="liste.php">Non, annuler</a>
-    </form>
-</body>
-</html>

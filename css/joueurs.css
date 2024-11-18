@@ -1,3 +1,6 @@
+/* Import des styles du header */
+@import 'header.css';
+
 :root {
     --bg-color: #121212;
     --text-color: #e0e0e0;
@@ -16,24 +19,38 @@ body {
     padding: 20px;
 }
 
+/* Styles spécifiques à la page joueurs */
 #container {
     display: flex;
     transition: transform 0.3s ease;
     gap: 20px;
     align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
 }
 
 #listeJoueurs {
-    flex: 3;
-    transition: flex 0.3s ease;
+    flex: 1;
+    padding: 20px;
+    width: 100%;
+    transition: all 0.3s ease;
+    overflow-x: auto;
 }
 
 #menuDroit {
-    flex: 1;
+    flex: 0;
+    transition: flex 0.3s ease;
+    min-width: 0;
+    width: 0;
     position: sticky;
     top: 98px; /* Augmenté pour descendre le menu */
     max-height: calc(100vh - 120px); /* Ajusté en fonction du nouveau top */
     overflow: hidden; /* Pour contenir le menu de modification */
+}
+
+#menuDroit.active {
+    flex: 0 0 300px;
+    width: 300px;
 }
 
 h1, h2 {
@@ -43,14 +60,19 @@ h1, h2 {
 
 table {
     width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    table-layout: fixed;
 }
 
 th, td {
     padding: 12px;
     border: 1px solid var(--surface-color);
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 th {
@@ -99,6 +121,8 @@ th {
     scrollbar-width: thin; /* Pour Firefox */
     scrollbar-color: var(--primary-color) var(--surface-color); /* Pour Firefox */
     padding-bottom: 60px; /* Plus d'espace en bas */
+    width: 100%;
+    min-width: 300px;
 }
 
 .menu-modification.active {
@@ -140,12 +164,97 @@ textarea {
     min-height: 100px;
 }
 
+/* Styles du modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 5px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* Style du formulaire modal */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74,144,226,0.3);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-content p {
+    margin: 20px 0;
+    font-size: 16px;
+}
+
 @media (max-width: 1024px) {
     #container {
         flex-direction: column;
     }
 
-    #menuDroit {
+    #menuDroit, #menuDroit.active {
+        width: 100%;
+        flex: 1;
+    }
+
+    #listeJoueurs {
         width: 100%;
     }
 
@@ -166,6 +275,16 @@ textarea {
 
     th, td {
         padding: 8px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 2% auto;
+    }
+
+    .form-group input,
+    .form-group select {
+        font-size: 16px;
     }
 }
 

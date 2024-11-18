@@ -25,10 +25,20 @@ $joueurs = getJoueurs($pdo);
     <link rel="stylesheet" href="css/joueurs.css">
 </head>
 <body>
+    <nav class="main-nav">
+        <div class="logo">
+            <a href="home.php">Rugby Manager</a>
+        </div>
+        <div class="user-menu">
+            <span>Bienvenue, <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : ''; ?></span>
+            <a href="logout.php">Déconnexion</a>
+        </div>
+    </nav>
+
     <div id="container">
         <div id="listeJoueurs">
             <h1>Gestion des Joueurs</h1>
-            <a href="joueurs/ajouter.php" class="btn btn-primary">Ajouter un nouveau joueur</a>
+            <button onclick="ouvrirModalAjout()" class="btn btn-primary">Ajouter un nouveau joueur</button>
             <table>
                 <thead>
                     <tr>
@@ -56,7 +66,7 @@ $joueurs = getJoueurs($pdo);
                         <td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
                         <td>
                             <button onclick="afficherMenu(<?= $joueur['id'] ?>)" class="btn btn-secondary">Modifier</button>
-                            <a href="joueurs/supprimer.php?id=<?= $joueur['id'] ?>" class="btn btn-danger">Supprimer</a>
+                            <button onclick="confirmerSuppression(<?= $joueur['id'] ?>)" class="btn btn-danger">Supprimer</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -76,6 +86,68 @@ $joueurs = getJoueurs($pdo);
                 <div class="btn-fermer">
                     <button onclick="fermerMenu()" class="btn btn-primary">Fermer</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ajout du modal -->
+    <div id="modalAjout" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ajouter un nouveau joueur</h2>
+            <form id="formAjoutJoueur" onsubmit="ajouterJoueur(event)">
+                <div class="form-group">
+                    <label for="nom">Nom:</label>
+                    <input type="text" id="nom" name="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom:</label>
+                    <input type="text" id="prenom" name="prenom" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero_licence">Numéro licence:</label>
+                    <input type="text" id="numero_licence" name="numero_licence" required>
+                </div>
+                <div class="form-group">
+                    <label for="date_naissance">Date de naissance:</label>
+                    <input type="date" id="date_naissance" name="date_naissance" required>
+                </div>
+                <div class="form-group">
+                    <label for="taille">Taille (cm):</label>
+                    <input type="number" id="taille" name="taille" required>
+                </div>
+                <div class="form-group">
+                    <label for="poids">Poids (kg):</label>
+                    <input type="number" id="poids" name="poids" required>
+                </div>
+                <div class="form-group">
+                    <label for="poste_prefere">Poste préféré:</label>
+                    <select id="poste_prefere" name="poste_prefere" required>
+                        <option value="Pilier">Pilier</option>
+                        <option value="Talonneur">Talonneur</option>
+                        <option value="Deuxième ligne">Deuxième ligne</option>
+                        <option value="Troisième ligne">Troisième ligne</option>
+                        <option value="Demi de mêlée">Demi de mêlée</option>
+                        <option value="Demi d'ouverture">Demi d'ouverture</option>
+                        <option value="Centre">Centre</option>
+                        <option value="Ailier">Ailier</option>
+                        <option value="Arrière">Arrière</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ajout du modal de suppression -->
+    <div id="modalSuppression" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Confirmer la suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce joueur ?</p>
+            <div class="modal-actions">
+                <button onclick="supprimerJoueur()" class="btn btn-danger">Supprimer</button>
+                <button onclick="fermerModalSuppression()" class="btn btn-secondary">Annuler</button>
             </div>
         </div>
     </div>
@@ -304,6 +376,103 @@ $joueurs = getJoueurs($pdo);
                 }
             }
         });
+
+        // Ajouter ces nouvelles fonctions
+        function ouvrirModalAjout() {
+            const modal = document.getElementById('modalAjout');
+            modal.style.display = "block";
+        }
+
+        const modal = document.getElementById('modalAjout');
+        const span = document.getElementsByClassName("close")[0];
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+            if (event.target == modalSuppression) {
+                fermerModalSuppression();
+            }
+        }
+
+        async function ajouterJoueur(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            
+            try {
+                const response = await fetch('joueurs/ajouter.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Erreur lors de l\'ajout du joueur');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'ajout du joueur');
+            }
+        }
+
+        // Ajout des fonctions pour la suppression
+        let joueurASupprimer = null;
+
+        function confirmerSuppression(joueurId) {
+            joueurASupprimer = joueurId;
+            const modalSuppression = document.getElementById('modalSuppression');
+            modalSuppression.style.display = "block";
+        }
+
+        function fermerModalSuppression() {
+            const modalSuppression = document.getElementById('modalSuppression');
+            modalSuppression.style.display = "none";
+            joueurASupprimer = null;
+        }
+
+        async function supprimerJoueur() {
+            if (!joueurASupprimer) return;
+            
+            try {
+                const response = await fetch(`joueurs/supprimer.php?id=${joueurASupprimer}`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${joueurASupprimer}` // Ajout de l'ID dans le body également
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Erreur lors de la suppression du joueur');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la suppression du joueur');
+            }
+            
+            fermerModalSuppression();
+        }
+
+        // Ajouter la gestion de fermeture pour le modal de suppression
+        const modalSuppression = document.getElementById('modalSuppression');
+        const closeSpanSuppression = modalSuppression.getElementsByClassName("close")[0];
+
+        closeSpanSuppression.onclick = function() {
+            fermerModalSuppression();
+        }
     </script>
 </body>
 </html>
