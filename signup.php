@@ -1,27 +1,44 @@
 <?php
-
+session_start();
 require_once 'config/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
+        // Vérification des champs vides
+        if (empty($_POST["username"]) || empty($_POST["email"]) || empty($_POST["password"])) {
+            throw new Exception("Tous les champs sont obligatoires");
+        }
+
         // Sécurisation des données
         $nom_utilisateur = htmlspecialchars($_POST["username"]);
         $email = htmlspecialchars($_POST["email"]);
         $mot_de_passe = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
-        // Modification de la requête pour correspondre aux noms des colonnes
-        $stmt = $conn->prepare("INSERT INTO utilisateurs (nom_utilisateur, email, mot_de_passe) VALUES (:nom_utilisateur, :email, :mot_de_passe)");
-        $stmt->bindParam(':nom_utilisateur', $nom_utilisateur);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':mot_de_passe', $mot_de_passe);
-        $stmt->execute();
+        // Vérification si l'utilisateur existe déjà
+        $check = $pdo->prepare("SELECT id FROM utilisateurs WHERE nom_utilisateur = ? OR email = ?");
+        $check->execute([$nom_utilisateur, $email]);
+        if ($check->rowCount() > 0) {
+            throw new Exception("Cet utilisateur ou email existe déjà");
+        }
 
-        echo "<script>alert('Inscription réussie!');</script>";
-        header("location: login.php");
-    } catch(PDOException $e) {
-        echo "<script>alert('Erreur: " . $e->getMessage() . "');</script>";
+        // Insertion de l'utilisateur
+        $stmt = $pdo->prepare("INSERT INTO utilisateurs (nom_utilisateur, email, mot_de_passe) VALUES (:nom_utilisateur, :email, :mot_de_passe)");
+        $result = $stmt->execute([
+            ':nom_utilisateur' => $nom_utilisateur,
+            ':email' => $email,
+            ':mot_de_passe' => $mot_de_passe
+        ]);
+
+        if ($result) {
+            $_SESSION['message'] = 'Inscription réussie!';
+            header("Location: login.php");
+            exit();
+        } else {
+            throw new Exception("Erreur lors de l'inscription");
+        }
+    } catch(Exception $e) {
+        $error = $e->getMessage();
     }
-    $conn = null;
 }
 ?>
 <!DOCTYPE html>
@@ -34,6 +51,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="container">
         <h2>Sign Up</h2>
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group">
                 <label>Username</label>

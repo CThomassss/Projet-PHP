@@ -143,7 +143,7 @@ $joueurs = getJoueurs($pdo);
     <div id="modalSuppression" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Confirmer la suppression</h2>
+            <h2>Confirmer la suppression</h2>1
             <p>Êtes-vous sûr de vouloir supprimer ce joueur ?</p>
             <div class="modal-actions">
                 <button onclick="supprimerJoueur()" class="btn btn-danger">Supprimer</button>
