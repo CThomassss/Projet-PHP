@@ -16,7 +16,7 @@
                 <li>La gestion des joueurs et leurs informations</li>
                 <li>L'organisation des matchs et des sélections</li>
                 <li>Le suivi des performances et des évaluations</li>
-                <li>La consultation des statistiques de l'équipe</li>
+                <li>La consultation des statistiques de l'équipe.</li>
             </ul>
         </div>
 
