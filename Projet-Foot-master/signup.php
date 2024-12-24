@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Sign Up</title>
-    <link rel="stylesheet" href="/Projet%20PHP/css/signup.css">
+    <link rel="stylesheet" href="/PROJET-FOOT/Projet-Foot-master/css/signup.css">
 </head>
 <body>
     <div class="container">

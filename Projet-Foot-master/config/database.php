@@ -1,7 +1,7 @@
 <?php
 try {
     $host = 'localhost';
-    $dbname = 'gestion_equipe_rugby';
+    $dbname = 'Projet-Foot';
     $user = 'root';  // Assurez-vous que c'est le bon utilisateur
     $pass = '';      // Laissez vide si pas de mot de passe
     

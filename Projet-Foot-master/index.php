@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenue</title>
-    <link rel="stylesheet" href="/Projet%20PHP/css/index.css">
+    <link rel="stylesheet" href="/PROJET-FOOT/Projet-Foot-master/css/index.css">
 </head>
 <body>
     <div class="container">

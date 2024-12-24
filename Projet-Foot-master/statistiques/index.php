@@ -32,7 +32,7 @@ GROUP BY j.id";
 <html>
 <head>
     <title>Statistiques</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="/PROJET-FOOT/Projet-Foot-master/css/style.css">
 </head>
 <body>
     <h1>Statistiques de l'Équipe</h1>

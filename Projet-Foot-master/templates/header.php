@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) : 'Rugby Manager'; ?></title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/PROJET-FOOT/Projet-Foot-master/css/style.css">
     <?php echo isset($additionalCss) ? $additionalCss : ''; ?>
 </head>
 <body>

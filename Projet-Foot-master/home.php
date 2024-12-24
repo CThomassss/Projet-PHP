@@ -11,7 +11,7 @@ if (!isset($_SESSION['utilisateur_id'])) {  // Changé de 'user_id' à 'utilisat
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord - Rugby Manager</title>
-    <link rel="stylesheet" type="text/css" href="./css/home.css">
+    <link rel="stylesheet" type="text/css" href="/PROJET-FOOT/Projet-Foot-master//css/home.css">
 </head>
 <body>
     <nav class="main-nav">
