@@ -1,9 +1,9 @@
 <?php
 try {
-    $host = 'frida.o2switch.net';
-    $dbname = 'ceqe8591_Gestionnaire_equipe';
-    $user = 'ceqe8591_Gestion_Equipe';  // Assurez-vous que c'est le bon utilisateur
-    $pass = 'Clem1406';      // Laissez vide si pas de mot de passe
+    $host = 'localhost';
+    $dbname = 'gestionnaire_equipe';
+    $user = 'root';  // Assurez-vous que c'est le bon utilisateur
+    $pass = '1406';      // Laissez vide si pas de mot de passe
     
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
