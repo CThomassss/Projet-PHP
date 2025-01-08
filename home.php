@@ -25,7 +25,7 @@ $utilisateur = $stmt->fetch();
 
 <style>
     body {
-        background-image: url('lib/logo_club.png');
+        background-image: url('lib/logo_alpha7.png');
 	    background-attachment: fixed;
         background-repeat: no-repeat;
         

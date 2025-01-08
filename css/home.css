@@ -3,7 +3,7 @@
 :root {
 	--c-gray-900: #1f1f1f;  /* Changé de #000000 */
 	--c-gray-800: #2e2e2e;  /* Changé de #1f1f1f */
-	--c-gray-700: #313131;
+	--c-gray-700: #F3B4621a;
 	--c-gray-600: #313131;
 	--c-gray-500: #969593;
 	--c-gray-400: #a6a6a6;
@@ -945,7 +945,7 @@ button {
 /* Nouveaux styles pour les statistiques */
 .stats-section {
     padding: 2rem;
-    background: var(--c-gray-800);
+    /*background: var(--c-gray-800);*/	
     border-radius: 8px;
     margin-bottom: 2rem;
 }
