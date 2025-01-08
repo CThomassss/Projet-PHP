@@ -71,7 +71,10 @@ $utilisateur = $stmt->fetch();
                             </div>
                             <div class="stat-card">
                                 <h3>Points</h3>
-                                <div class="stat-value"><span style="color: #F2EBBF;">+<?= $stats['points_marques'] ?></span> / <span style="color: #F06060;">-<?= $stats['points_encaisses'] ?></span></div>
+                                <div class="stat-value <?= (strlen($stats['points_marques']) + strlen($stats['points_encaisses']) > 6) ? 'large-numbers' : '' ?>">
+                                    <span style="color: #F2EBBF;">+<?= $stats['points_marques'] ?></span> / 
+                                    <span style="color: #F06060;">-<?= $stats['points_encaisses'] ?></span>
+                                </div>
                                 <div class="stat-details">
                                     <span>Marqués/Encaissés</span>
                                 </div>

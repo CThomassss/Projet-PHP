@@ -144,8 +144,6 @@ a {
 	}
 }
 
-.app-body-sidebar {
-}
 
 .footer {
 	margin-top: auto;
@@ -983,6 +981,33 @@ button {
     font-weight: 700;
     color: var(--c-text-primary);
     margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Ajout de styles adaptatifs pour les grands nombres */
+.stat-value span {
+    font-size: inherit;
+}
+
+/* Réduire la taille quand le contenu est large */
+.stat-value.large-numbers {
+    font-size: 1.5rem; /* Taille réduite pour les grands nombres */
+}
+
+/* Style spécifique pour les points (marqués/encaissés) */
+.stat-points {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 2rem;
+}
+
+.stat-points.large-numbers {
+    font-size: 1.5rem;
 }
 
 .stat-details {
