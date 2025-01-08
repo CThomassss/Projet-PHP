@@ -1232,3 +1232,39 @@ button {
 
 /* ...existing code... */
 
+/* ...existing code... */
+
+.header-content {
+    width: 100%;
+}
+
+.category-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.category-btn {
+    background: var(--c-gray-700);
+    color: var(--c-text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.category-btn:hover {
+    background: var(--c-gray-600);
+    transform: translateY(-2px);
+}
+
+.category-btn.active {
+    background: #8CBEB2;
+    color: var(--c-gray-800);
+}
+
+/* ...existing code... */
+

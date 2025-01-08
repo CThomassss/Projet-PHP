@@ -1,6 +1,23 @@
 <?php
 function getJoueurs($pdo) {
-    $sql = "SELECT * FROM joueurs ORDER BY nom, prenom";
+    $sql = "SELECT *, 
+            CASE 
+                WHEN age < 6 THEN 'U6'
+                WHEN age < 8 THEN 'U8'
+                WHEN age < 10 THEN 'U10'
+                WHEN age < 12 THEN 'U12'
+                WHEN age < 14 THEN 'U14'
+                WHEN age < 16 THEN 'U16'
+                WHEN age < 18 THEN 'U18'
+                WHEN age < 20 THEN 'U20'
+                ELSE 'Seniors'
+            END as categorie
+            FROM (
+                SELECT *, 
+                TIMESTAMPDIFF(YEAR, date_naissance, CURDATE()) as age 
+                FROM joueurs
+            ) as joueurs_with_age
+            ORDER BY nom, prenom";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();
