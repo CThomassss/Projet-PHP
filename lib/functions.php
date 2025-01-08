@@ -164,3 +164,58 @@ function sauvegarderSelection($pdo, $match_id, $selections) {
         throw $e;
     }
 }
+
+function getStatistiques($pdo) {
+    // Statistiques des matchs
+    $stats = [
+        'total_matchs' => 0,
+        'victoires' => 0,
+        'defaites' => 0,
+        'nuls' => 0,
+        'points_marques' => 0,
+        'points_encaisses' => 0,
+        'pourcentage_victoires' => 0,
+        'moyenne_points_marques' => 0,
+        'moyenne_points_encaisses' => 0,
+        'joueurs_absents' => 0
+    ];
+
+    // Récupérer tous les matchs terminés (avec un résultat)
+    $stmt = $pdo->prepare("SELECT resultat FROM matchs WHERE resultat IS NOT NULL");
+    $stmt->execute();
+    $matchs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stats['total_matchs'] = count($matchs);
+
+    foreach ($matchs as $match) {
+        if (!empty($match['resultat'])) {
+            list($points_equipe, $points_adversaire) = explode('-', $match['resultat']);
+            
+            $stats['points_marques'] += (int)$points_equipe;
+            $stats['points_encaisses'] += (int)$points_adversaire;
+
+            if ((int)$points_equipe > (int)$points_adversaire) {
+                $stats['victoires']++;
+            } elseif ((int)$points_equipe < (int)$points_adversaire) {
+                $stats['defaites']++;
+            } else {
+                $stats['nuls']++;
+            }
+        }
+    }
+
+    // Calcul des moyennes et pourcentages
+    if ($stats['total_matchs'] > 0) {
+        $stats['moyenne_points_marques'] = round($stats['points_marques'] / $stats['total_matchs'], 2);
+        $stats['moyenne_points_encaisses'] = round($stats['points_encaisses'] / $stats['total_matchs'], 2);
+        $stats['pourcentage_victoires'] = round(($stats['victoires'] / $stats['total_matchs']) * 100, 1);
+    }
+
+    // Compter les joueurs absents
+    $stmt = $pdo->prepare("SELECT COUNT(*) as absents FROM joueurs WHERE statut = 'Absent'");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stats['joueurs_absents'] = $result['absents'];
+
+    return $stats;
+}

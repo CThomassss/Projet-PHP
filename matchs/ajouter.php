@@ -1,59 +1,44 @@
 <?php
 session_start();
+require_once '../config/database.php';
+
+header('Content-Type: application/json');
+
 if (!isset($_SESSION['utilisateur_id'])) {
-    header('Location: ../login.php');
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Non autorisé']);
+    exit;
 }
 
-require_once '../config/database.php';
-require_once '../lib/functions.php';
-
-$message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        if (ajouterMatch($pdo, $_POST)) {
-            header('Location: liste.php');
-            exit();
+        // Récupération des données du formulaire
+        $date = $_POST['date'] ?? '';
+        $heure = $_POST['heure'] ?? '';
+        $equipe_adverse = $_POST['equipe_adverse'] ?? '';
+        $lieu = $_POST['lieu'] ?? '';
+
+        // Vérification que toutes les données nécessaires sont présentes
+        if (empty($date) || empty($heure) || empty($equipe_adverse) || empty($lieu)) {
+            echo json_encode(['success' => false, 'message' => 'Tous les champs sont requis']);
+            exit;
+        }
+
+        // Préparation et exécution de la requête
+        $stmt = $pdo->prepare("INSERT INTO matchs (date, heure, equipe_adverse, lieu) VALUES (?, ?, ?, ?)");
+        $result = $stmt->execute([$date, $heure, $equipe_adverse, $lieu]);
+
+        if ($result) {
+            echo json_encode(['success' => true, 'message' => 'Match ajouté avec succès']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de l\'ajout du match']);
         }
     } catch (PDOException $e) {
-        $message = "Erreur lors de l'ajout du match: " . $e->getMessage();
+        error_log($e->getMessage()); // Log l'erreur sur le serveur
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Erreur lors de l\'ajout du match: ' . $e->getMessage()
+        ]);
     }
+} else {
+    echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);
 }
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Ajouter un match</title>
-</head>
-<body>
-    <h1>Ajouter un match</h1>
-    <?php if ($message): ?>
-        <div style="color: red;"><?= htmlspecialchars($message) ?></div>
-    <?php endif; ?>
-    
-    <form method="POST">
-        <div>
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required>
-        </div>
-        <div>
-            <label for="heure">Heure:</label>
-            <input type="time" id="heure" name="heure" required>
-        </div>
-        <div>
-            <label for="equipe_adverse">Équipe adverse:</label>
-            <input type="text" id="equipe_adverse" name="equipe_adverse" required>
-        </div>
-        <div>
-            <label for="lieu">Lieu:</label>
-            <select id="lieu" name="lieu" required>
-                <option value="Domicile">Domicile</option>
-                <option value="Extérieur">Extérieur</option>
-            </select>
-        </div>
-        <button type="submit">Ajouter</button>
-        <a href="liste.php">Annuler</a>
-    </form>
-</body>
-</html>
