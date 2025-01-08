@@ -1,7 +1,11 @@
 <?php
 try {
     $host = 'localhost';
+<<<<<<< Updated upstream:Projet-Foot-master/config/database.php
     $dbname = 'Projet-Foot';
+=======
+    $dbname = 'Projet%20PHP';
+>>>>>>> Stashed changes:config/database.php
     $user = 'root';  // Assurez-vous que c'est le bon utilisateur
     $pass = '';      // Laissez vide si pas de mot de passe
     
