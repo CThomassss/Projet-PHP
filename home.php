@@ -101,14 +101,18 @@ $utilisateur = $stmt->fetch();
             <section class="transfer-section">
 				<div class="transfer-section-header">
 					<h2>Liste des Joueurs</h2>
-					<div class="filter-options">
-						<button class="icon-button">
-							<i class="ph-funnel"></i>
-						</button>
-						<button class="icon-button">
-							<i class="ph-plus"></i>
-						</button>
-					</div>
+					<div class="category-filters">
+                        <button class="category-btn active" data-category="all">Tous</button>
+                        <button class="category-btn" data-category="U6">U6</button>
+                        <button class="category-btn" data-category="U8">U8</button>
+                        <button class="category-btn" data-category="U10">U10</button>
+                        <button class="category-btn" data-category="U12">U12</button>
+                        <button class="category-btn" data-category="U14">U14</button>
+                        <button class="category-btn" data-category="U16">U16</button>
+                        <button class="category-btn" data-category="U18">U18</button>
+                        <button class="category-btn" data-category="U20">U20</button>
+                        <button class="category-btn" data-category="Seniors">Seniors</button>
+                    </div>
 				</div>
 				<div class="transfers">
 					<table class="players-table">
@@ -132,19 +136,19 @@ $utilisateur = $stmt->fetch();
 							$joueurs = getJoueurs($pdo);
 							foreach ($joueurs as $joueur): 
 							?>
-							<tr>
-								<td><?= htmlspecialchars($joueur['nom']) ?></td>
-								<td><?= htmlspecialchars($joueur['prenom']) ?></td>
-								<td><?= htmlspecialchars($joueur['numero_licence']) ?></td>
-								<td><?= htmlspecialchars($joueur['date_naissance']) ?></td>
-								<td><?= htmlspecialchars((string)($joueur['taille'] ?? '')) ?> cm</td>
-								<td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
-								<td><?= htmlspecialchars($joueur['statut']) ?></td>
-								<td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
-								<td>
-									<i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
-								</td>
-							</tr>
+								<tr data-category="<?= htmlspecialchars($joueur['categorie']) ?>">
+									<td><?= htmlspecialchars($joueur['nom']) ?></td>
+									<td><?= htmlspecialchars($joueur['prenom']) ?></td>
+									<td><?= htmlspecialchars($joueur['numero_licence']) ?></td>
+									<td><?= htmlspecialchars($joueur['date_naissance']) ?></td>
+									<td><?= htmlspecialchars((string)($joueur['taille'] ?? '')) ?> cm</td>
+									<td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
+									<td><?= htmlspecialchars($joueur['statut']) ?></td>
+									<td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
+									<td>
+										<i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
+									</td>
+								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
@@ -865,6 +869,33 @@ function ouvrirModalStats() {
 function fermerModalStats() {
     document.getElementById('modalStats').style.display = 'none';
 }
+
+// Ajouter cette nouvelle fonction pour le filtrage des catégories
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const playerRows = document.querySelectorAll('.players-table tbody tr');
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Retirer la classe active de tous les boutons
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Ajouter la classe active au bouton cliqué
+            button.classList.add('active');
+            
+            const selectedCategory = button.dataset.category;
+            
+            // Afficher/masquer les lignes selon la catégorie
+            playerRows.forEach(row => {
+                if (selectedCategory === 'all' || row.dataset.category === selectedCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+});
 </script>
 
 <!-- Modifier les styles CSS à la fin du fichier -->
