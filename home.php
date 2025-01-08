@@ -44,7 +44,13 @@ $utilisateur = $stmt->fetch();
 			<section class="stats-section">
                 <div class="stats-background">
                     <div class="stats-content">
-                        <h2>Statistiques de l'équipe</h2>
+                        <div class="stats-header">
+                            <h2>Statistiques de l'équipe</h2>
+                            <button class="stats-details-button" onclick="ouvrirModalStats()">
+                                Plus de statistiques
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                         <?php
                         $stats = getStatistiques($pdo);
                         ?>
@@ -382,6 +388,120 @@ $utilisateur = $stmt->fetch();
             </div>
             <button type="submit" class="btn-submit">Enregistrer</button>
         </form>
+    </div>
+</div>
+
+<!-- Ajouter avant la fermeture du body -->
+<div id="modalStats" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close" onclick="fermerModalStats()">&times;</span>
+        <h2>Statistiques détaillées</h2>
+        
+        <div class="stats-detailed">
+            <div class="stats-section-detailed">
+                <h3>Statistiques d'équipe</h3>
+                
+                <div class="stats-category">
+                    <h4>Générales</h4>
+                    <div class="stats-grid-detailed">
+                        <div class="stat-item">
+                            <span class="stat-label">Matchs joués</span>
+                            <span class="stat-value"><?= $stats['total_matchs'] ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Victoires</span>
+                            <span class="stat-value"><?= $stats['victoires'] ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Défaites</span>
+                            <span class="stat-value"><?= $stats['defaites'] ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Nuls</span>
+                            <span class="stat-value"><?= $stats['nuls'] ?></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-category">
+                    <h4>Attaque</h4>
+                    <div class="stats-grid-detailed">
+                        <div class="stat-item">
+                            <span class="stat-label">Essais marqués</span>
+                            <span class="stat-value"><?= $stats['essais_marques'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Transformations réussies</span>
+                            <span class="stat-value"><?= $stats['transformations_reussies'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Pénalités réussies</span>
+                            <span class="stat-value"><?= $stats['penalites_reussies'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Drops réussis</span>
+                            <span class="stat-value"><?= $stats['drops_reussis'] ?? 0 ?></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-category">
+                    <h4>Défense</h4>
+                    <div class="stats-grid-detailed">
+                        <div class="stat-item">
+                            <span class="stat-label">Essais encaissés</span>
+                            <span class="stat-value"><?= $stats['essais_encaisses'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Plaquages réussis</span>
+                            <span class="stat-value"><?= $stats['plaquages_reussis'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Turnovers gagnés</span>
+                            <span class="stat-value"><?= $stats['turnovers_gagnes'] ?? 0 ?></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Pénalités concédées</span>
+                            <span class="stat-value"><?= $stats['penalites_concedees'] ?? 0 ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section-detailed">
+                <h3>Statistiques individuelles</h3>
+                <div class="stats-players-table-container">
+                    <table class="stats-players-table">
+                        <thead>
+                            <tr>
+                                <th>Joueur</th>
+                                <th>Matchs</th>
+                                <th>Titularisations</th>
+                                <th>Temps de jeu</th>
+                                <th>Essais</th>
+                                <th>Passes décisives</th>
+                                <th>Plaquages</th>
+                                <th>Turnovers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($stats['joueurs'] ?? [] as $joueur): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($joueur['nom']) ?></td>
+                                <td><?= $joueur['matchs_joues'] ?? 0 ?></td>
+                                <td><?= $joueur['titularisations'] ?? 0 ?></td>
+                                <td><?= $joueur['temps_jeu'] ?? '0:00' ?></td>
+                                <td><?= $joueur['essais'] ?? 0 ?></td>
+                                <td><?= $joueur['passes_decisives'] ?? 0 ?></td>
+                                <td><?= $joueur['plaquages'] ?? 0 ?></td>
+                                <td><?= $joueur['turnovers'] ?? 0 ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -727,12 +847,20 @@ async function sauvegarderJoueur(event) {
 
 // Mettre à jour le gestionnaire de clics en dehors
 window.onclick = function(event) {
-    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur'];
+    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur', 'modalStats'];
     modals.forEach(modalId => {
         if (event.target == document.getElementById(modalId)) {
             document.getElementById(modalId).style.display = 'none';
         }
     });
+}
+
+function ouvrirModalStats() {
+    document.getElementById('modalStats').style.display = 'block';
+}
+
+function fermerModalStats() {
+    document.getElementById('modalStats').style.display = 'none';
 }
 </script>
 
