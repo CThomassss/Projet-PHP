@@ -22,6 +22,15 @@ $utilisateur = $stmt->fetch();
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body {
+        background-image: url('lib/logo_club.png');
+	    background-attachment: fixed;
+        background-repeat: no-repeat;
+        
+    }
+    </style>
 </head>
 <body>
 <div class="app">
@@ -33,46 +42,50 @@ $utilisateur = $stmt->fetch();
 	<div class="app-body">
 		<div class="app-body-main-content">
 			<section class="stats-section">
-			    <h2>Statistiques de l'équipe</h2>
-			    <?php
-			    $stats = getStatistiques($pdo);
-			    ?>
-			    <div class="stats-grid">
-			        <div class="stat-card">
-			            <h3>Matchs</h3>
-			            <div class="stat-value"><?= $stats['total_matchs'] ?></div>
-			            <div class="stat-details">
-							<span style="color: #F2EBBF;">V: <?= $stats['victoires'] ?></span>
-			                <span>N: <?= $stats['nuls'] ?></span>
-							<span style="color: #F06060;">D: <?= $stats['defaites'] ?></span>
-			            </div>
-			        </div>
-			        <div class="stat-card">
-			            <h3>Victoires</h3>
-			            <div class="stat-value"><?= $stats['pourcentage_victoires'] ?>%</div>
-			            <div class="stat-label">Pourcentage de victoires</div>
-			        </div>
-			        <div class="stat-card">
-			            <h3>Points</h3>
-						<div class="stat-value"><span style="color: #F2EBBF;">+<?= $stats['points_marques'] ?></span> / <span style="color: #F06060;">-<?= $stats['points_encaisses'] ?></span></div>
-			            <div class="stat-details">
-			                <span>Marqués/Encaissés</span>
-			            </div>
-			        </div>
-			        <div class="stat-card">
-			            <h3>Moyennes</h3>
-			            <div class="stat-details">
-			                <span>Marqués: <?= $stats['moyenne_points_marques'] ?></span>
-			                <span>Encaissés: <?= $stats['moyenne_points_encaisses'] ?></span>
-			            </div>
-			        </div>
-			        <div class="stat-card">
-			            <h3>Effectif</h3>
-			            <div class="stat-value"><?= $stats['joueurs_absents'] ?></div>
-			            <div class="stat-label">Joueurs absents</div>
-			        </div>
-			    </div>
-			</section>
+                <div class="stats-background">
+                    <div class="stats-content">
+                        <h2>Statistiques de l'équipe</h2>
+                        <?php
+                        $stats = getStatistiques($pdo);
+                        ?>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Matchs</h3>
+                                <div class="stat-value"><?= $stats['total_matchs'] ?></div>
+                                <div class="stat-details">
+                                    <span style="color: #F2EBBF;">V: <?= $stats['victoires'] ?></span>
+                                    <span>N: <?= $stats['nuls'] ?></span>
+                                    <span style="color: #F06060;">D: <?= $stats['defaites'] ?></span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Victoires</h3>
+                                <div class="stat-value"><?= $stats['pourcentage_victoires'] ?>%</div>
+                                <div class="stat-label">Pourcentage de victoires</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Points</h3>
+                                <div class="stat-value"><span style="color: #F2EBBF;">+<?= $stats['points_marques'] ?></span> / <span style="color: #F06060;">-<?= $stats['points_encaisses'] ?></span></div>
+                                <div class="stat-details">
+                                    <span>Marqués/Encaissés</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Moyennes</h3>
+                                <div class="stat-details">
+                                    <span>Marqués: <?= $stats['moyenne_points_marques'] ?></span>
+                                    <span>Encaissés: <?= $stats['moyenne_points_encaisses'] ?></span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Effectif</h3>
+                                <div class="stat-value"><?= $stats['joueurs_absents'] ?></div>
+                                <div class="stat-label">Joueurs absents</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 			
 			<section class="transfer-section">
 				<div class="transfer-section-header">

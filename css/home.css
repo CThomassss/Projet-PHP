@@ -33,6 +33,8 @@ body {
 	justify-content: center;
 	align-items: center; /* Ajouté */
 	overflow: hidden; /* Ajouté pour empêcher le scroll */
+
+	
 }
 
 *,
@@ -1059,4 +1061,3 @@ button {
     font-size: 0.9em;
 }
 
-/* ...existing code... */
