@@ -316,17 +316,36 @@ document.querySelectorAll('.tab-button').forEach(button => {
     });
 });
 
-function ouvrirModalMatch(match) {
-    const modal = document.getElementById('modalFeuilleMatch');
-    document.getElementById('fm_match_id').value = match.id;
-    document.getElementById('fm_date_match').textContent = new Date(match.date).toLocaleDateString() + ' ' + match.heure;
-    document.getElementById('fm_equipe_adverse').textContent = match.equipe_adverse;
-    document.getElementById('fm_lieu').textContent = match.lieu;
-    
-    // Charger les joueurs
-    chargerJoueursDisponibles(match.id);
-    
-    modal.style.display = 'block';
+function ouvrirModalMatch(match = null) {
+    if (match === null) {
+        // C'est un nouvel ajout
+        const modal = document.getElementById('modalMatch');
+        // Réinitialiser le formulaire
+        document.getElementById('formAjoutMatch').reset();
+        modal.style.display = 'block';
+    } else {
+        // C'est une modification/consultation existante
+        const modal = document.getElementById('modalFeuilleMatch');
+        document.getElementById('fm_match_id').value = match.id;
+        document.getElementById('fm_date_match').textContent = new Date(match.date).toLocaleDateString() + ' ' + match.heure;
+        document.getElementById('fm_equipe_adverse').textContent = match.equipe_adverse;
+        document.getElementById('fm_lieu').textContent = match.lieu;
+        
+        // Charger les joueurs
+        chargerJoueursDisponibles(match.id);
+        
+        modal.style.display = 'block';
+    }
+}
+
+// Mettre à jour le gestionnaire de clics en dehors pour inclure tous les modals
+window.onclick = function(event) {
+    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch'];
+    modals.forEach(modalId => {
+        if (event.target == document.getElementById(modalId)) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    });
 }
 
 async function chargerJoueursDisponibles(matchId) {
