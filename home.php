@@ -8,6 +8,11 @@ if (!isset($_SESSION['utilisateur_id'])) {  // Changé de 'user_id' à 'utilisat
 // Ajouter ces lignes avant d'utiliser getStatistiques()
 require_once './config/database.php';
 require_once './lib/functions.php';
+
+// Récupérer les informations de l'utilisateur connecté
+$stmt = $pdo->prepare("SELECT nom_utilisateur FROM utilisateurs WHERE id = ?");
+$stmt->execute([$_SESSION['utilisateur_id']]);
+$utilisateur = $stmt->fetch();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -16,9 +21,14 @@ require_once './lib/functions.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <div class="app">
+    <!-- Modifier le message de bienvenue pour utiliser nom_utilisateur -->
+    <div class="welcome-message">
+        <h1><span class="welcome-text">Bienvenue</span> <?= htmlspecialchars($utilisateur['nom_utilisateur']) ?><span class="welcome-text"> !</span></h1>
+    </div>
 	
 	<div class="app-body">
 		<div class="app-body-main-content">
@@ -32,9 +42,9 @@ require_once './lib/functions.php';
 			            <h3>Matchs</h3>
 			            <div class="stat-value"><?= $stats['total_matchs'] ?></div>
 			            <div class="stat-details">
-			                <span>V: <?= $stats['victoires'] ?></span>
+							<span style="color: #F2EBBF;">V: <?= $stats['victoires'] ?></span>
 			                <span>N: <?= $stats['nuls'] ?></span>
-			                <span>D: <?= $stats['defaites'] ?></span>
+							<span style="color: #F06060;">D: <?= $stats['defaites'] ?></span>
 			            </div>
 			        </div>
 			        <div class="stat-card">
@@ -44,7 +54,7 @@ require_once './lib/functions.php';
 			        </div>
 			        <div class="stat-card">
 			            <h3>Points</h3>
-			            <div class="stat-value">+<?= $stats['points_marques'] ?> / -<?= $stats['points_encaisses'] ?></div>
+						<div class="stat-value"><span style="color: #F2EBBF;">+<?= $stats['points_marques'] ?></span> / <span style="color: #F06060;">-<?= $stats['points_encaisses'] ?></span></div>
 			            <div class="stat-details">
 			                <span>Marqués/Encaissés</span>
 			            </div>
@@ -88,6 +98,7 @@ require_once './lib/functions.php';
 								<th>Poids</th>
 								<th>Statut</th>
 								<th>Poste préféré</th>
+								<th>Actions</th> <!-- Nouvelle colonne -->
 							</tr>
 						</thead>
 						<tbody>
@@ -106,6 +117,9 @@ require_once './lib/functions.php';
 								<td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
 								<td><?= htmlspecialchars($joueur['statut']) ?></td>
 								<td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
+								<td>
+									<i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
+								</td>
 							</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -302,6 +316,60 @@ require_once './lib/functions.php';
     </div>
 </div>
 
+<!-- Ajouter le modal de modification des joueurs avant la fermeture du body -->
+<div id="modalJoueur" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fermerModalJoueur()">&times;</span>
+        <h2>Modifier le joueur</h2>
+        <form id="formModifierJoueur" onsubmit="sauvegarderJoueur(event)">
+            <input type="hidden" id="joueur_id" name="id">
+            <div class="form-group">
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" required>
+            </div>
+            <div class="form-group">
+                <label for="prenom">Prénom:</label>
+                <input type="text" id="prenom" name="prenom" required>
+            </div>
+            <div class="form-group">
+                <label for="numero_licence">Numéro de licence:</label>
+                <input type="text" id="numero_licence" name="numero_licence" required>
+            </div>
+            <div class="form-group">
+                <label for="date_naissance">Date de naissance:</label>
+                <input type="date" id="date_naissance" name="date_naissance" required>
+            </div>
+            <div class="form-group">
+                <label for="taille">Taille (cm):</label>
+                <input type="number" id="taille" name="taille" min="0" max="300">
+            </div>
+            <div class="form-group">
+                <label for="poids">Poids (kg):</label>
+                <input type="number" id="poids" name="poids" min="0" max="200">
+            </div>
+            <div class="form-group">
+                <label for="statut">Statut:</label>
+                <select id="statut" name="statut" required>
+                    <option value="Actif">Actif</option>
+                    <option value="Blessé">Blessé</option>
+                    <option value="Suspendu">Suspendu</option>
+                    <option value="Absent">Absent</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="poste_prefere">Poste préféré:</label>
+                <select id="poste_prefere" name="poste_prefere">
+                    <option value="Gardien">Gardien</option>
+                    <option value="Défenseur">Défenseur</option>
+                    <option value="Milieu">Milieu</option>
+                    <option value="Attaquant">Attaquant</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Enregistrer</button>
+        </form>
+    </div>
+</div>
+
 <!-- Ajouter le JavaScript à la fin du body -->
 <script>
 document.querySelectorAll('.tab-button').forEach(button => {
@@ -340,7 +408,7 @@ function ouvrirModalMatch(match = null) {
 
 // Mettre à jour le gestionnaire de clics en dehors pour inclure tous les modals
 window.onclick = function(event) {
-    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch'];
+    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur'];
     modals.forEach(modalId => {
         if (event.target == document.getElementById(modalId)) {
             document.getElementById(modalId).style.display = 'none';
@@ -599,6 +667,209 @@ function rendreJoueursDraggable() {
         zone.addEventListener('drop', handleDrop);
     });
 }
+
+function modifierJoueur(joueur) {
+    const modal = document.getElementById('modalJoueur');
+    const form = document.getElementById('formModifierJoueur');
+    
+    // Remplir le formulaire avec les données du joueur
+    Object.keys(joueur).forEach(key => {
+        const input = form.elements[key];
+        if (input) {
+            input.value = joueur[key];
+        }
+    });
+    
+    modal.style.display = 'block';
+}
+
+function fermerModalJoueur() {
+    document.getElementById('modalJoueur').style.display = 'none';
+}
+
+async function sauvegarderJoueur(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    
+    try {
+        const response = await fetch('joueurs/modifier.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la modification du joueur');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la modification du joueur');
+    }
+}
+
+// Mettre à jour le gestionnaire de clics en dehors
+window.onclick = function(event) {
+    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur'];
+    modals.forEach(modalId => {
+        if (event.target == document.getElementById(modalId)) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    });
+}
 </script>
+
+<!-- Modifier les styles CSS à la fin du fichier -->
+<style>
+/* Ajouter ces styles CSS */
+.welcome-message {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.welcome-message h1 {
+    color: #8CBEB2;
+    font-size: 2rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.welcome-message .welcome-text {
+    color: var(--c-text-primary); /* Blanc */
+}
+
+.btn-edit {
+    background: var(--c-gray-700);
+    color: var(--c-text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit:hover {
+    background: var(--c-gray-600);
+}
+
+/* Nouveaux styles pour le modal joueur */
+#modalJoueur .modal-content {
+    max-width: 600px;
+    width: 90%;
+    margin: 5vh auto; /* Remonter le modal (avant c'était 10vh) */
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+#modalJoueur .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#modalJoueur .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--c-text-secondary);
+}
+
+#modalJoueur .form-group input,
+#modalJoueur .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--c-gray-600);
+    background: var(--c-gray-700);
+    color: var(--c-text-primary);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#modalJoueur .modal-content h2 {
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+    color: var(--c-text-primary);
+}
+
+#modalJoueur .btn-submit {
+    margin-top: 2rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+/* Style pour la scrollbar du modal */
+#modalJoueur .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#modalJoueur .modal-content::-webkit-scrollbar-track {
+    background: var(--c-gray-800);
+}
+
+#modalJoueur .modal-content::-webkit-scrollbar-thumb {
+    background: var(--c-gray-600);
+    border-radius: 4px;
+}
+
+/* Nouveaux styles pour les titres */
+h2, h3 {
+    color: #8CBEB2;
+}
+
+.stat-card h3 {
+    color: var(--c-text-tertiary); /* Garder la couleur d'origine pour les titres des statistiques */
+}
+
+#modalJoueur .modal-content h2,
+#modalMatch .modal-content h2,
+#modalScore .modal-content h2,
+#modalFeuilleMatch .modal-content h2 {
+    color: #8CBEB2;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+/* Ajouter ces styles pour l'alignement des titres */
+.stats-section h2,
+.transfer-section-header h2 {
+    padding-left: 1rem;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.stats-section {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+.transfer-section {
+    margin-top: 1rem; /* Réduit la marge du haut */
+}
+
+.transfer-section-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Style pour l'icône de modification */
+.edit-icon {
+    color: var(--c-text-primary);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.edit-icon:hover {
+    color: #8CBEB2;
+}
+
+/* Centrer l'icône dans la colonne */
+.players-table td:last-child {
+    text-align: center;
+    width: 50px; /* Largeur fixe pour la colonne des actions */
+}
+</style>
 </body>
 </html>
