@@ -86,8 +86,10 @@ $utilisateur = $stmt->fetch();
                     </div>
                 </div>
             </section>
-			
-			<section class="transfer-section">
+            
+            <div class="section-separator"></div>
+            
+            <section class="transfer-section">
 				<div class="transfer-section-header">
 					<h2>Liste des Joueurs</h2>
 					<div class="filter-options">

@@ -716,8 +716,12 @@ button {
     z-index: 1;
 }
 
+.players-table tr:nth-child(even) {
+    background-color: #F3B4621a;
+}
+
 .players-table tr:hover {
-    background-color: var(--c-gray-700);
+    background-color: var(--c-gray-700);  /* Garder l'effet hover existant */
 }
 
 /* Personnalisation de la scrollbar */
@@ -992,6 +996,17 @@ button {
 .stat-label {
     color: var(--c-text-tertiary);
     font-size: 0.875rem;
+}
+
+/* ...existing code... */
+
+/* Ajout du style pour le séparateur */
+.section-separator {
+    width: 60%;
+    height: 1px;
+    background: var(--c-gray-500);
+    margin: 1rem auto;
+    opacity: 0.5;
 }
 
 /* ...existing code... */
