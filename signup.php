@@ -49,6 +49,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="/Projet%20PHP/css/signup.css">
 </head>
 <body>
+<style>
+    body {
+        background-image: url('lib/logo_alpha7.png');
+	    background-attachment: fixed;
+        background-repeat: no-repeat;
+        
+    }
+    </style>
     <div class="container">
         <h2>Sign Up</h2>
         <?php if (isset($error)): ?>
@@ -70,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <input type="submit" value="Sign Up">
             </div>
-            <p>Already have an account? <a href="login.php">Login here</a>.</p>
+            <p>Vous avez déjà un compte ? <a href="login.php">Login here</a>.</p>
         </form>
     </div>
 </body>
