@@ -385,19 +385,18 @@ $utilisateur = $stmt->fetch();
                 </select>
             </div>
             <div class="form-group">
-                <label for="poste_prefere">Poste préféré:</label>
-                <select id="poste_prefere" name="poste_prefere">
-                    <option value="Gardien">Gardien</option>
-                    <option value="Défenseur">Défenseur</option>
-                    <option value="Milieu">Milieu</option>
-                    <option value="Attaquant">Attaquant</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-submit">Enregistrer</button>
-        </form>
-    </div>
+    <label for="poste_prefere">Poste préféré:</label>
+    <select id="poste_prefere" name="poste_prefere">
+        <option value="Gardien">Gardien</option>
+        <option value="Défenseur">Défenseur</option>
+        <option value="Milieu">Milieu</option>
+        <option value="Attaquant">Attaquant</option>
+    </select>
 </div>
-
+<button type="submit" class="btn-submit">Enregistrer</button>
+</form>
+</div>
+</div>
 <!-- Ajouter avant la fermeture du body -->
 <div id="modalStats" class="modal">
     <div class="modal-content modal-large">
@@ -413,11 +412,11 @@ $utilisateur = $stmt->fetch();
                     <div class="stats-grid-detailed">
                         <div class="stat-item">
                             <span class="stat-label">Matchs joués</span>
-                            <span class="stat-value"><?= $stats['total_matchs'] ?></span>
+                            <span class="stat-value"><?= htmlspecialchars($stats['total_matchs'], ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Victoires</span>
-                            <span class="stat-value"><?= $stats['victoires'] ?></span>
+                            <span class="stat-value"><?= htmlspecialchars($stats['victoires'], ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Défaites</span>
