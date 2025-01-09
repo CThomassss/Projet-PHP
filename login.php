@@ -39,6 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <link rel="stylesheet" href="/Projet%20PHP/css/login.css">
 <div class="login-container">
+<style>
+    body {
+        background-image: url('lib/logo_alpha7.png');
+	    background-attachment: fixed;
+        background-repeat: no-repeat;
+        
+    }
+    </style>
     <h1>Connexion</h1>
     <?php if (isset($error)): ?>
         <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
