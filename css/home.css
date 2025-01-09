@@ -858,6 +858,7 @@ button {
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
     z-index: 1000;
+	
 }
 
 .modal-content {
@@ -870,13 +871,16 @@ button {
     position: relative;
 }
 
+
+/* Bouton de fermeture */
 .close {
     position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 1.5rem;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #aaa;
     cursor: pointer;
-    color: var(--c-text-tertiary);
 }
 
 .form-group {
@@ -1044,46 +1048,43 @@ button {
 /* ...existing code... */
 
 .modal-large {
-    max-width: 1200px; /* Augmenté de 800px à 1200px */
-    width: 95%; /* Augmenté de 90% à 95% */
-    max-height: 90vh; /* Augmenté de 80vh à 90vh */
-    margin: 5vh auto; /* Ajouté pour monter le modal (avant c'était 10%) */
-    overflow-y: auto;
+    max-width: 1100px; /* Réduit la largeur maximale */
+    width: 95%; /* Garde la largeur à 95% */
+    max-height: 85vh; /* Réduit la hauteur maximale */
+    margin: 4vh auto; /* Réduit la marge */
+    overflow: hidden; /* Empêche l'apparition d'une scrollbar */
+    box-sizing: border-box; /* Prend en compte les bordures et marges dans la taille totale */
 }
 
 .joueurs-selection {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem; /* Augmenté de 1rem à 2rem pour plus d'espace entre les colonnes */
-    margin: 2rem 0; /* Augmenté de 1rem à 2rem */
+    gap: 0.8rem; /* Réduit davantage l'espace entre les colonnes */
+    margin: 0.8rem 0; /* Réduit la marge */
+    overflow: hidden; /* Empêche le débordement et l'apparition d'une scrollbar */
 }
 
 .joueurs-list {
-    min-height: 300px; /* Augmenté de 200px à 300px */
-    max-height: 60vh; /* Ajouté pour limiter la hauteur */
-    overflow-y: auto; /* Ajouté pour permettre le défilement */
+    min-height: 210px; /* Réduit la hauteur minimale */
+    max-height: 40vh; /* Réduit la hauteur maximale */
+    overflow: hidden; /* Empêche l'apparition d'une scrollbar */
     background: var(--c-gray-700);
     border-radius: 4px;
-    padding: 1.5rem; /* Augmenté de 1rem à 1.5rem */
+    padding: 0.5rem; /* Réduit encore plus le padding */
     transition: background-color 0.3s ease, border 0.3s ease;
+    box-sizing: border-box; /* Inclut les bordures et marges dans la taille totale */
 }
 
 .match-info-header {
-    padding: 1.5rem; /* Augmenté de 1rem à 1.5rem */
-    margin-bottom: 2rem; /* Augmenté de 1rem à 2rem */
-    font-size: 1.1em; /* Ajouté pour augmenter la taille du texte */
-}
-
-/* Ajout de styles pour améliorer la visibilité des zones de drop */
-.joueurs-list.drag-over {
-    border: 2px dashed var(--c-text-primary);
-    background: var(--c-gray-600);
+    padding: 0.5rem; /* Réduit le padding */
+    margin-bottom: 0.8rem; /* Réduit la marge */
+    font-size: 0.85em; /* Réduit encore la taille du texte */
 }
 
 .joueur-item {
     background: var(--c-gray-800);
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
+    padding: 0.3rem; /* Réduit le padding */
+    margin-bottom: 0.15rem; /* Réduit la marge */
     border-radius: 4px;
     cursor: move;
     display: flex;
@@ -1091,11 +1092,12 @@ button {
     align-items: center;
     transition: all 0.3s ease;
     user-select: none;
+    font-size: 0.65em; /* Réduit la taille du texte */
 }
 
 .joueur-item.dragging {
     opacity: 0.5;
-    transform: scale(0.95);
+    transform: scale(0.85);
 }
 
 .joueur-nom {
@@ -1105,7 +1107,7 @@ button {
 
 .joueur-poste {
     color: var(--c-text-tertiary);
-    font-size: 0.9em;
+    font-size: 0.65em; /* Réduit la taille du texte */
 }
 
 /* Styles pour le bouton des statistiques détaillées */
