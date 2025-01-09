@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="/Projet%20PHP/css/index.css">
 </head>
 <body>
+<style>
+        body {
+            background-image: url('lib/logo_alpha7.png');
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+    </style>
     <div class="container">
         <h1>Bienvenue sur notre plateforme</h1>
         
