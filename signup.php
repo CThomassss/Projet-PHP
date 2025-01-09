@@ -10,13 +10,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Sécurisation des données
-        $nom_utilisateur = htmlspecialchars($_POST["username"]);
-        $email = htmlspecialchars($_POST["email"]);
-        $mot_de_passe = password_hash($_POST["password"], PASSWORD_DEFAULT);
+        $nom_utilisateur = htmlspecialchars(trim($_POST["username"]));
+        $email = htmlspecialchars(trim($_POST["email"]));
+        $mot_de_passe = password_hash(trim($_POST["password"]), PASSWORD_DEFAULT);
 
         // Vérification si l'utilisateur existe déjà
-        $check = $pdo->prepare("SELECT id FROM utilisateurs WHERE nom_utilisateur = ? OR email = ?");
-        $check->execute([$nom_utilisateur, $email]);
+        $check = $pdo->prepare("SELECT id FROM utilisateurs WHERE nom_utilisateur = :nom_utilisateur OR email = :email");
+        $check->execute([':nom_utilisateur' => $nom_utilisateur, ':email' => $email]);
         if ($check->rowCount() > 0) {
             throw new Exception("Cet utilisateur ou email existe déjà");
         }
@@ -52,34 +52,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <style>
     body {
         background-image: url('lib/logo_alpha7.png');
-	    background-attachment: fixed;
+        background-attachment: fixed;
         background-repeat: no-repeat;
-        
     }
-    </style>
-    <div class="container">
-        <h2>Sign Up</h2>
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" required>
-            </div>    
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Sign Up">
-            </div>
-            <p>Vous avez déjà un compte ? <a href="login.php">Login here</a>.</p>
-        </form>
-    </div>
+</style>
+<div class="container">
+    <h2>S'inscrire</h2>
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+    <?php endif; ?>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" required>
+        </div>    
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Sign Up">
+        </div>
+        <p>Vous avez déjà un compte ? <a href="login.php">Login here</a>.</p>
+    </form>
+</div>
 </body>
 </html>
