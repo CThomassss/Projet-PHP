@@ -1,19 +1,26 @@
+<!-- ============================================
+   1. INITIALISATION ET CONFIGURATION
+============================================ -->
 <?php
 session_start();
-if (!isset($_SESSION['utilisateur_id'])) {  // Changé de 'user_id' à 'utilisateur_id'
+if (!isset($_SESSION['utilisateur_id'])) {
     header('Location: login.php');
     exit();
 }
 
-// Ajouter ces lignes avant d'utiliser getStatistiques()
 require_once './config/database.php';
 require_once './lib/functions.php';
 
-// Récupérer les informations de l'utilisateur connecté
+// Récupération des informations utilisateur
 $stmt = $pdo->prepare("SELECT nom_utilisateur FROM utilisateurs WHERE id = ?");
 $stmt->execute([$_SESSION['utilisateur_id']]);
 $utilisateur = $stmt->fetch();
 ?>
+
+<!-- ============================================
+   2. EN-TÊTE HTML
+============================================ -->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -32,16 +39,22 @@ $utilisateur = $stmt->fetch();
     }
     </style>
 </head>
+
+<!-- ============================================
+   3. STRUCTURE PRINCIPALE
+============================================ -->
 <body>
 <div class="app">
-    <!-- Modifier le message de bienvenue pour utiliser nom_utilisateur -->
+    <!-- Message de bienvenue -->
     <div class="welcome-message">
         <h1><span class="welcome-text">Bienvenue</span> <?= htmlspecialchars($utilisateur['nom_utilisateur']) ?><span class="welcome-text"> !</span></h1>
     </div>
-	
-	<div class="app-body">
-		<div class="app-body-main-content">
-			<section class="stats-section">
+    
+    <div class="app-body">
+        <!-- Contenu principal -->
+        <div class="app-body-main-content">
+            <!-- Section Statistiques -->
+            <section class="stats-section">
                 <div class="stats-background">
                     <div class="stats-content">
                         <div class="stats-header">
@@ -96,12 +109,14 @@ $utilisateur = $stmt->fetch();
                 </div>
             </section>
             
+            <!-- Séparateur -->
             <div class="section-separator"></div>
             
+            <!-- Section Liste des Joueurs -->
             <section class="transfer-section">
-				<div class="transfer-section-header">
-					<h2>Liste des Joueurs</h2>
-					<div class="category-filters">
+                <div class="transfer-section-header">
+                    <h2>Liste des Joueurs</h2>
+                    <div class="category-filters">
                         <button class="category-btn active" data-category="all">Tous</button>
                         <button class="category-btn" data-category="U6">U6</button>
                         <button class="category-btn" data-category="U8">U8</button>
@@ -113,115 +128,122 @@ $utilisateur = $stmt->fetch();
                         <button class="category-btn" data-category="U20">U20</button>
                         <button class="category-btn" data-category="Seniors">Seniors</button>
                     </div>
-				</div>
-				<div class="transfers">
-					<table class="players-table">
-						<thead>
-							<tr>
-								<th>Nom</th>
-								<th>Prénom</th>
-								<th>Numéro de licence</th>
-								<th>Date de naissance</th>
-								<th>Taille</th>
-								<th>Poids</th>
-								<th>Statut</th>
-								<th>Poste préféré</th>
-								<th>Actions</th> <!-- Nouvelle colonne -->
-							</tr>
-						</thead>
-						<tbody>
-							<?php 
-							require_once './config/database.php';
-							require_once './lib/functions.php';
-							$joueurs = getJoueurs($pdo);
-							foreach ($joueurs as $joueur): 
-							?>
-								<tr data-category="<?= htmlspecialchars($joueur['categorie']) ?>">
-									<td><?= htmlspecialchars($joueur['nom']) ?></td>
-									<td><?= htmlspecialchars($joueur['prenom']) ?></td>
-									<td><?= htmlspecialchars($joueur['numero_licence']) ?></td>
-									<td><?= htmlspecialchars($joueur['date_naissance']) ?></td>
-									<td><?= htmlspecialchars((string)($joueur['taille'] ?? '')) ?> cm</td>
-									<td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
-									<td><?= htmlspecialchars($joueur['statut']) ?></td>
-									<td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
-									<td>
-										<i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				</div>
-			</section>
-		</div>
-		<div class="app-body-sidebar">
-			<section class="match-section">
-				<h2>Matchs</h2>
-				<div class="matches-header">
-					<div class="matches-tabs">
-						<button class="tab-button active" data-tab="upcoming">À venir</button>
-						<button class="tab-button" data-tab="past">Passés</button>
-					</div>
-					<button class="add-match-button" onclick="ouvrirModalMatch()">
-						<i class="ph-plus"></i>
-						Ajouter un match
-					</button>
-				</div>
-				
-				<div class="matches-container upcoming active">
-					<?php
-					require_once './config/database.php';
-					$stmt = $pdo->prepare("SELECT * FROM matchs WHERE date >= CURDATE() ORDER BY date ASC, heure ASC LIMIT 5");
-					$stmt->execute();
-					$upcoming_matches = $stmt->fetchAll();
-					
-					foreach($upcoming_matches as $match): ?>
-					<div class="match-card" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
-						<div class="match-date">
-							<?= date('d M Y', strtotime($match['date'])) ?>
-						</div>
-						<div class="match-teams">
-							<span class="team-home">Notre équipe</span>
-							<span class="vs">VS</span>
-							<span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
-						</div>
-						<div class="match-info">
-							<span class="match-time"><?= date('H:i', strtotime($match['heure'])) ?></span>
-							<span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
-						</div>
-					</div>
-					<?php endforeach; ?>
-				</div>
+                </div>
+                <div class="transfers">
+                    <table class="players-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Numéro de licence</th>
+                                <th>Date de naissance</th>
+                                <th>Taille</th>
+                                <th>Poids</th>
+                                <th>Statut</th>
+                                <th>Poste préféré</th>
+                                <th>Actions</th> <!-- Nouvelle colonne -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            require_once './config/database.php';
+                            require_once './lib/functions.php';
+                            $joueurs = getJoueurs($pdo);
+                            foreach ($joueurs as $joueur): 
+                            ?>
+                                <tr data-category="<?= htmlspecialchars($joueur['categorie']) ?>">
+                                    <td><?= htmlspecialchars($joueur['nom']) ?></td>
+                                    <td><?= htmlspecialchars($joueur['prenom']) ?></td>
+                                    <td><?= htmlspecialchars($joueur['numero_licence']) ?></td>
+                                    <td><?= htmlspecialchars($joueur['date_naissance']) ?></td>
+                                    <td><?= htmlspecialchars((string)($joueur['taille'] ?? '')) ?> cm</td>
+                                    <td><?= htmlspecialchars((string)($joueur['poids'] ?? '')) ?> kg</td>
+                                    <td><?= htmlspecialchars($joueur['statut']) ?></td>
+                                    <td><?= htmlspecialchars((string)($joueur['poste_prefere'] ?? '')) ?></td>
+                                    <td>
+                                        <i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
 
-				<div class="matches-container past">
-					<?php
-					$stmt = $pdo->prepare("SELECT * FROM matchs WHERE date < CURDATE() ORDER BY date DESC, heure DESC LIMIT 5");
-					$stmt->execute();
-					$past_matches = $stmt->fetchAll();
-					
-					foreach($past_matches as $match): ?>
-					<div class="match-card" onclick="ouvrirModalScore(<?= htmlspecialchars(json_encode($match)) ?>)">
-						<div class="match-date">
-							<?= date('d M Y', strtotime($match['date'])) ?>
-						</div>
-						<div class="match-teams">
-							<span class="team-home">Notre équipe</span>
-							<span class="score"><?= htmlspecialchars($match['resultat']) ?></span>
-							<span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
-						</div>
-						<div class="match-info">
-							<span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
-						</div>
-					</div>
-					<?php endforeach; ?>
-				</div>
-			</section>
-		</div>
-	</div>
+        <!-- Barre latérale -->
+        <div class="app-body-sidebar">
+            <!-- Section Matchs -->
+            <section class="match-section">
+                <h2>Matchs</h2>
+                <div class="matches-header">
+                    <div class="matches-tabs">
+                        <button class="tab-button active" data-tab="upcoming">À venir</button>
+                        <button class="tab-button" data-tab="past">Passés</button>
+                    </div>
+                    <button class="add-match-button" onclick="ouvrirModalMatch()">
+                        <i class="ph-plus"></i>
+                        Ajouter un match
+                    </button>
+                </div>
+                
+                <div class="matches-container upcoming active">
+                    <?php
+                    require_once './config/database.php';
+                    $stmt = $pdo->prepare("SELECT * FROM matchs WHERE date >= CURDATE() ORDER BY date ASC, heure ASC LIMIT 5");
+                    $stmt->execute();
+                    $upcoming_matches = $stmt->fetchAll();
+                    
+                    foreach($upcoming_matches as $match): ?>
+                    <div class="match-card" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
+                        <div class="match-date">
+                            <?= date('d M Y', strtotime($match['date'])) ?>
+                        </div>
+                        <div class="match-teams">
+                            <span class="team-home">Notre équipe</span>
+                            <span class="vs">VS</span>
+                            <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
+                        </div>
+                        <div class="match-info">
+                            <span class="match-time"><?= date('H:i', strtotime($match['heure'])) ?></span>
+                            <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="matches-container past">
+                    <?php
+                    $stmt = $pdo->prepare("SELECT * FROM matchs WHERE date < CURDATE() ORDER BY date DESC, heure DESC LIMIT 5");
+                    $stmt->execute();
+                    $past_matches = $stmt->fetchAll();
+                    
+                    foreach($past_matches as $match): ?>
+                    <div class="match-card" onclick="ouvrirModalScore(<?= htmlspecialchars(json_encode($match)) ?>)">
+                        <div class="match-date">
+                            <?= date('d M Y', strtotime($match['date'])) ?>
+                        </div>
+                        <div class="match-teams">
+                            <span class="team-home">Notre équipe</span>
+                            <span class="score"><?= htmlspecialchars($match['resultat']) ?></span>
+                            <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
+                        </div>
+                        <div class="match-info">
+                            <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        </div>
+    </div>
 </div>
 
-<!-- Modal pour l'ajout de match -->
+<!-- ============================================
+   4. MODALS
+============================================ -->
+
+<!-- Modal Ajout Match -->
 <div id="modalMatch" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fermerModalMatch()">&times;</span>
@@ -251,7 +273,7 @@ $utilisateur = $stmt->fetch();
     </div>
 </div>
 
-<!-- Ajouter ce nouveau modal avant la fermeture du body -->
+<!-- Modal Modification Match -->
 <div id="modalModifierMatch" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fermerModalModifierMatch()">&times;</span>
@@ -280,7 +302,7 @@ $utilisateur = $stmt->fetch();
     </div>
 </div>
 
-<!-- Modifier le modal pour le score -->
+<!-- Modal Score -->
 <div id="modalScore" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fermerModalScore()">&times;</span>
@@ -309,7 +331,7 @@ $utilisateur = $stmt->fetch();
     </div>
 </div>
 
-<!-- Ajouter avant la fermeture de body -->
+<!-- Modal Feuille de Match -->
 <div id="modalFeuilleMatch" class="modal">
     <div class="modal-content modal-large">
         <span class="close" onclick="fermerModalFeuilleMatch()">&times;</span>
@@ -344,7 +366,7 @@ $utilisateur = $stmt->fetch();
     </div>
 </div>
 
-<!-- Ajouter le modal de modification des joueurs avant la fermeture du body -->
+<!-- Modal Joueur -->
 <div id="modalJoueur" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fermerModalJoueur()">&times;</span>
@@ -385,19 +407,20 @@ $utilisateur = $stmt->fetch();
                 </select>
             </div>
             <div class="form-group">
-    <label for="poste_prefere">Poste préféré:</label>
-    <select id="poste_prefere" name="poste_prefere">
-        <option value="Gardien">Gardien</option>
-        <option value="Défenseur">Défenseur</option>
-        <option value="Milieu">Milieu</option>
-        <option value="Attaquant">Attaquant</option>
-    </select>
+                <label for="poste_prefere">Poste préféré:</label>
+                <select id="poste_prefere" name="poste_prefere">
+                    <option value="Gardien">Gardien</option>
+                    <option value="Défenseur">Défenseur</option>
+                    <option value="Milieu">Milieu</option>
+                    <option value="Attaquant">Attaquant</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Enregistrer</button>
+        </form>
+    </div>
 </div>
-<button type="submit" class="btn-submit">Enregistrer</button>
-</form>
-</div>
-</div>
-<!-- Ajouter avant la fermeture du body -->
+
+<!-- Modal Statistiques -->
 <div id="modalStats" class="modal">
     <div class="modal-content modal-large">
         <span class="close" onclick="fermerModalStats()">&times;</span>
@@ -511,20 +534,27 @@ $utilisateur = $stmt->fetch();
     </div>
 </div>
 
-<!-- Ajouter le JavaScript à la fin du body -->
+<!-- ============================================
+   5. SCRIPTS
+============================================ -->
+
 <script>
-document.querySelectorAll('.tab-button').forEach(button => {
-    button.addEventListener('click', () => {
-        // Remove active class from all buttons and containers
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.matches-container').forEach(c => c.classList.remove('active'));
-        
-        // Add active class to clicked button and corresponding container
-        button.classList.add('active');
-        document.querySelector(`.matches-container.${button.dataset.tab}`).classList.add('active');
+// Gestion des onglets
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons and containers
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.matches-container').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding container
+            button.classList.add('active');
+            document.querySelector(`.matches-container.${button.dataset.tab}`).classList.add('active');
+        });
     });
 });
 
+// Fonctions pour les matchs
 function ouvrirModalMatch(match = null) {
     if (match === null) {
         // C'est un nouvel ajout
@@ -547,16 +577,7 @@ function ouvrirModalMatch(match = null) {
     }
 }
 
-// Mettre à jour le gestionnaire de clics en dehors pour inclure tous les modals
-window.onclick = function(event) {
-    const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur'];
-    modals.forEach(modalId => {
-        if (event.target == document.getElementById(modalId)) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-    });
-}
-
+// Fonctions pour la feuille de match
 async function chargerJoueursDisponibles(matchId) {
     try {
         const response = await fetch(`matchs/get_joueurs_disponibles.php?match_id=${matchId}`);
@@ -748,7 +769,7 @@ window.onclick = function(event) {
     }
 }
 
-// Fonctions pour le drag and drop
+// Fonctions drag and drop
 function handleDragStart(e) {
     e.target.classList.add('dragging');
     e.dataTransfer.setData('text/plain', e.target.dataset.joueurId);
@@ -809,6 +830,7 @@ function rendreJoueursDraggable() {
     });
 }
 
+// Fonctions pour les joueurs
 function modifierJoueur(joueur) {
     const modal = document.getElementById('modalJoueur');
     const form = document.getElementById('formModifierJoueur');
@@ -861,6 +883,7 @@ window.onclick = function(event) {
     });
 }
 
+// Fonctions pour les statistiques
 function ouvrirModalStats() {
     document.getElementById('modalStats').style.display = 'block';
 }
@@ -869,7 +892,7 @@ function fermerModalStats() {
     document.getElementById('modalStats').style.display = 'none';
 }
 
-// Ajouter cette nouvelle fonction pour le filtrage des catégories
+// Gestion des catégories
 document.addEventListener('DOMContentLoaded', function() {
     const categoryButtons = document.querySelectorAll('.category-btn');
     const playerRows = document.querySelectorAll('.players-table tbody tr');
@@ -897,9 +920,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Modifier les styles CSS à la fin du fichier -->
+<!-- ============================================
+   6. STYLES INLINE
+============================================ -->
+
 <style>
-/* Ajouter ces styles CSS */
+/* Styles pour le message de bienvenue */
 .welcome-message {
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -917,6 +943,7 @@ document.addEventListener('DOMContentLoaded', function() {
     color: var(--c-text-primary); /* Blanc */
 }
 
+/* Styles pour les boutons */
 .btn-edit {
     background: var(--c-gray-700);
     color: var(--c-text-primary);
@@ -931,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function() {
     background: var(--c-gray-600);
 }
 
-/* Nouveaux styles pour le modal joueur */
+/* Styles pour les modals */
 #modalJoueur .modal-content {
     max-width: 600px;
     width: 90%;
@@ -989,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 4px;
 }
 
-/* Nouveaux styles pour les titres */
+/* Styles pour les titres */
 h2, h3 {
     color: #8CBEB2;
 }
@@ -1029,7 +1056,7 @@ h2, h3 {
     margin-bottom: 1rem;
 }
 
-/* Style pour l'icône de modification */
+/* Styles pour les icônes */
 .edit-icon {
     color: var(--c-text-primary);
     cursor: pointer;
@@ -1047,5 +1074,6 @@ h2, h3 {
     width: 50px; /* Largeur fixe pour la colonne des actions */
 }
 </style>
+
 </body>
 </html>
