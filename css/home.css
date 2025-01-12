@@ -40,6 +40,9 @@ body {
     justify-content: center;
     align-items: center; /* Ajouté */
     overflow: hidden; /* Ajouté pour empêcher le scroll */
+    background-image: url('../lib/logo_alpha7.png');
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 }
 
 *,
@@ -798,31 +801,88 @@ h2, h3 {
    19. STYLES DE LA FEUILLE DE MATCH
 ============================================ */
 .modal-large {
-    max-width: 1100px;
+    max-width: 1200px;
     width: 95%;
-    max-height: 85vh;
-    margin: 4vh auto;
-    overflow: hidden;
-    box-sizing: border-box;
+    margin: 2vh auto;
+}
+
+.modal-large .modal-content {
+    max-height: 95vh;
+    padding: 2rem;
+    overflow-y: auto;
 }
 
 .joueurs-selection {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.8rem;
-    margin: 0.8rem 0;
-    overflow: hidden;
+    gap: 1rem;
+    height: calc(100vh - 300px);
+    max-height: 600px;
+    margin: 1rem 0;
 }
 
 .joueurs-list {
-    min-height: 210px;
-    max-height: 40vh;
-    overflow: hidden;
     background: var(--c-gray-700);
     border-radius: 4px;
     padding: 0.5rem;
-    transition: background-color 0.3s ease, border 0.3s ease;
-    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid var(--c-gray-600);
+}
+
+.joueurs-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.joueurs-list::-webkit-scrollbar-track {
+    background: var(--c-gray-800);
+}
+
+.joueurs-list::-webkit-scrollbar-thumb {
+    background: var(--c-gray-600);
+    border-radius: 3px;
+}
+
+.joueurs-list.drag-over {
+    background: var(--c-gray-600);
+    border: 2px dashed var(--c-text-primary);
+}
+
+.joueur-item {
+    background: var(--c-gray-800);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.joueur-item:last-child {
+    margin-bottom: 0;
+}
+
+.joueur-item .joueur-nom {
+    font-weight: 600;
+}
+
+.joueur-item .joueur-poste {
+    color: var(--c-text-tertiary);
+    font-size: 0.8rem;
+}
+
+.joueur-item:hover {
+    transform: translateX(4px);
+    background: var(--c-gray-700);
+}
+
+.joueur-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
 }
 
 .match-info-header {

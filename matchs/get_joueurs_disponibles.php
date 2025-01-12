@@ -1,39 +1,32 @@
 <?php
 session_start();
-require_once '../config/database.php';
-
 header('Content-Type: application/json');
 
+require_once '../config/database.php';
+require_once '../models/queries.php';
+
 if (!isset($_SESSION['utilisateur_id'])) {
+    http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Non autorisé']);
     exit;
 }
 
-$match_id = $_GET['match_id'] ?? null;
-
-if (!$match_id) {
-    echo json_encode(['success' => false, 'message' => 'ID du match manquant']);
+if (!isset($_GET['match_id'])) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Match ID requis']);
     exit;
 }
 
 try {
-    $stmt = $pdo->prepare("
-        SELECT j.*, 
-            CASE 
-                WHEN fm.titulaire = 1 THEN 'titulaire'
-                WHEN fm.remplacant = 1 THEN 'remplacant'
-                ELSE 'disponible'
-            END as statut
-        FROM joueurs j
-        LEFT JOIN feuille_match fm ON j.id = fm.joueur_id AND fm.match_id = ?
-        WHERE j.statut = 'Actif'
-        ORDER BY j.nom, j.prenom
-    ");
+    $match_id = intval($_GET['match_id']);
+    $joueurs = getJoueursByMatch($pdo, $match_id);
     
-    $stmt->execute([$match_id]);
-    $joueurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode(['success' => true, 'joueurs' => $joueurs]);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode([
+        'success' => true,
+        'joueurs' => $joueurs
+    ]);
+} catch (Exception $e) {
+    error_log($e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erreur lors de la récupération des joueurs']);
 }
