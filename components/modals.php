@@ -221,6 +221,12 @@ if (!isset($stats)) {
                     <option value="Attaquant">Attaquant</option>
                 </select>
             </div>
+
+            <div class="form-group">
+    <label for="commentaire">Commentaire</label>
+    <textarea id="commentaire" name="commentaire" rows="4" required style="width: 100%; resize: vertical;"></textarea>
+</div>
+
             <button type="submit" class="btn-submit">Enregistrer</button>
         </form>
     </div>
