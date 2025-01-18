@@ -226,9 +226,17 @@ $stats['joueurs'] = getPlayerStats($pdo);
                 </div>
 
                 <div class="matches-container past">
-                    <?php
-                    foreach($past_matches as $match): ?>
-                    <div class="match-card" onclick="ouvrirModalScore(<?= htmlspecialchars(json_encode($match)) ?>)">
+                    <?php foreach($past_matches as $match): 
+                        // Préparer les données pour le JSON
+                        $matchData = [
+                            'id' => $match['id'],
+                            'date' => $match['date'],
+                            'equipe_adverse' => $match['equipe_adverse'],
+                            'lieu' => $match['lieu'],
+                            'resultat' => $match['resultat']
+                        ];
+                    ?>
+                    <div class="match-card" onclick='ouvrirModalScore(<?= json_encode($matchData) ?>)'>
                         <div class="match-date">
                             <?= date('d M Y', strtotime($match['date'])) ?>
                         </div>

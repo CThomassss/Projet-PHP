@@ -34,6 +34,66 @@ function ouvrirModalMatch(match = null) {
     }
 }
 
+function ouvrirModalScore(match) {
+    console.log('Match data received:', match); // Débogage
+
+    try {
+        // Si match est une chaîne JSON, la parser
+        if (typeof match === 'string') {
+            match = JSON.parse(match);
+        }
+
+        const modal = document.getElementById('modalScore');
+        if (!modal) {
+            console.error('Modal element not found');
+            return;
+        }
+
+        // Remplir les champs du modal avec les données du match
+        document.getElementById('score_match_id').value = match.id;
+        document.getElementById('score_equipe_adverse_display').textContent = match.equipe_adverse;
+        document.getElementById('score_date_display').textContent = new Date(match.date).toLocaleDateString();
+        document.getElementById('score_lieu_display').textContent = match.lieu;
+        document.getElementById('score_resultat').value = match.resultat || '';
+
+        // Afficher le modal
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Erreur lors de l\'ouverture du modal:', error);
+        console.error('Match data:', match);
+    }
+}
+
+async function modifierScore(event) {
+    event.preventDefault();
+    
+    try {
+        const formData = new FormData(document.getElementById('formModifierScore'));
+        
+        const response = await fetch('matchs/update_score.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Fermer le modal et rafraîchir la page
+            fermerModalScore();
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la mise à jour du score');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour du score');
+    }
+}
+
+function fermerModalScore() {
+    const modal = document.getElementById('modalScore');
+    modal.style.display = 'none';
+}
 
 // Fonctions pour la feuille de match
 function creerElementJoueur(joueur) {

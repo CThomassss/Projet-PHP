@@ -75,37 +75,57 @@ function getJoueursByMatch($pdo, $matchId) {
 
 // Requêtes pour les statistiques
 function getTeamStats($pdo) {
-    $stmt = $pdo->prepare("SELECT 
-        COUNT(*) as total_matchs,
-        SUM(CASE WHEN resultat LIKE '%-%' AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) > CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 ELSE 0 END) as victoires,
-        SUM(CASE WHEN resultat LIKE '%-%' AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) = CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 ELSE 0 END) as nuls,
-        SUM(CASE WHEN resultat LIKE '%-%' AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) < CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 ELSE 0 END) as defaites,
-        SUM(CASE WHEN resultat LIKE '%-%' THEN CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) ELSE 0 END) as points_marques,
-        SUM(CASE WHEN resultat LIKE '%-%' THEN CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) ELSE 0 END) as points_encaisses
+    $stats = [];
+    
+    // Récupérer tous les matchs avec résultat
+    $stmt = $pdo->query("SELECT COUNT(*) as total, 
+        SUM(CASE 
+            WHEN resultat IS NOT NULL AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) > CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 
+            ELSE 0 
+        END) as victoires,
+        SUM(CASE 
+            WHEN resultat IS NOT NULL AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) = CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 
+            ELSE 0 
+        END) as nuls,
+        SUM(CASE 
+            WHEN resultat IS NOT NULL AND CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED) < CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED) THEN 1 
+            ELSE 0 
+        END) as defaites,
+        SUM(CAST(SUBSTRING_INDEX(resultat, '-', 1) AS SIGNED)) as points_marques,
+        SUM(CAST(SUBSTRING_INDEX(resultat, '-', -1) AS SIGNED)) as points_encaisses
         FROM matchs 
-        WHERE date < CURDATE()");
-    $stmt->execute();
-    $stats = $stmt->fetch();
-
+        WHERE resultat IS NOT NULL");
+    
+    $resultats = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $stats['total_matchs'] = $resultats['total'] ?? 0;
+    $stats['victoires'] = $resultats['victoires'] ?? 0;
+    $stats['nuls'] = $resultats['nuls'] ?? 0;
+    $stats['defaites'] = $resultats['defaites'] ?? 0;
+    $stats['points_marques'] = $resultats['points_marques'] ?? 0;
+    $stats['points_encaisses'] = $resultats['points_encaisses'] ?? 0;
+    
+    // Calculer le pourcentage de victoires
+    if ($stats['total_matchs'] > 0) {
+        $stats['pourcentage_victoires'] = round(($stats['victoires'] / $stats['total_matchs']) * 100);
+    } else {
+        $stats['pourcentage_victoires'] = 0;
+    }
+    
+    // Calculer les moyennes
+    if ($stats['total_matchs'] > 0) {
+        $stats['moyenne_points_marques'] = round($stats['points_marques'] / $stats['total_matchs'], 1);
+        $stats['moyenne_points_encaisses'] = round($stats['points_encaisses'] / $stats['total_matchs'], 1);
+    } else {
+        $stats['moyenne_points_marques'] = 0;
+        $stats['moyenne_points_encaisses'] = 0;
+    }
+    
     // Compter les joueurs absents
-    $stmt = $pdo->prepare("SELECT COUNT(*) as joueurs_absents FROM joueurs WHERE statut = 'Absent'");
-    $stmt->execute();
-    $absents = $stmt->fetch();
-    $stats['joueurs_absents'] = $absents['joueurs_absents'];
-
-    // Calcul du pourcentage de victoires
-    $stats['pourcentage_victoires'] = $stats['total_matchs'] > 0 
-        ? round(($stats['victoires'] / $stats['total_matchs']) * 100) 
-        : 0;
-
-    // Calcul des moyennes
-    $stats['moyenne_points_marques'] = $stats['total_matchs'] > 0 
-        ? round($stats['points_marques'] / $stats['total_matchs'], 1) 
-        : 0;
-    $stats['moyenne_points_encaisses'] = $stats['total_matchs'] > 0 
-        ? round($stats['points_encaisses'] / $stats['total_matchs'], 1) 
-        : 0;
-
+    $stmt = $pdo->query("SELECT COUNT(*) as absents FROM joueurs WHERE statut = 'Absent'");
+    $absents = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stats['joueurs_absents'] = $absents['absents'];
+    
     return $stats;
 }
 
