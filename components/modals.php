@@ -74,6 +74,7 @@ if (!isset($stats)) {
                     <option value="Exterieur">Extérieur</option>
                 </select>
             </div>
+            
             <button type="submit" class="btn-submit">Ajouter</button>
         </form>
     </div>
@@ -126,6 +127,7 @@ if (!isset($stats)) {
                     <span id="score_lieu_display"></span>
                 </div>
             </div>
+            
             <div class="score-section">
                 <h3>Score</h3>
                 <div class="form-group score-inputs">
@@ -221,6 +223,24 @@ if (!isset($stats)) {
                     <option value="Attaquant">Attaquant</option>
                 </select>
             </div>
+
+            <div class="form-group">
+    <label for="commentaire">Commentaire</label>
+    <textarea id="commentaire" name="commentaire" rows="4" required style="width: 100%; resize: vertical;"></textarea>
+</div>
+<h3>Évaluer les joueurs</h3>
+        <form id="formEvaluerJoueurs" onsubmit="evaluerJoueurs(event)">
+            <div class="form-group">
+                <label for="eval_joueur_id">ID du Joueur:</label>
+                <input type="text" id="eval_joueur_id" name="joueur_id" required>
+            </div>
+            <div class="form-group">
+                <label for="eval_note">Note (sur 10):</label>
+                <input type="number" id="eval_note" name="note" min="0" max="10" required>
+            </div>
+            <button type="submit" class="btn-submit">Évaluer</button>
+        </form>
+
             <button type="submit" class="btn-submit">Enregistrer</button>
         </form>
     </div>
