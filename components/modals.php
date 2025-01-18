@@ -47,6 +47,25 @@ if (!isset($stats)) {
     background: var(--c-gray-600);
     border-radius: 4px;
 }
+
+/* Style pour la liste des commentaires */
+#commentaires {
+            margin-top: 15px;
+            list-style: none;
+            padding: 0;
+        }
+
+        #commentaires li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        #commentaires .date {
+            font-size: 0.8em;
+            color: gray;
+        }
 </style>
 
 <!-- Modal Ajout Match -->
@@ -74,7 +93,6 @@ if (!isset($stats)) {
                     <option value="Exterieur">Extérieur</option>
                 </select>
             </div>
-            
             <button type="submit" class="btn-submit">Ajouter</button>
         </form>
     </div>
@@ -173,78 +191,111 @@ if (!isset($stats)) {
         </form>
     </div>
 </div>
+    <!-- Modal Joueur -->
+    <div id="modalJoueur" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fermerModalJoueur()">&times;</span>
+            <h2>Modifier le joueur</h2>
+            <form id="formModifierJoueur" onsubmit="sauvegarderJoueur(event)">
+                <input type="hidden" id="joueur_id" name="id">
 
-<!-- Modal Joueur -->
-<div id="modalJoueur" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="fermerModalJoueur()">&times;</span>
-        <h2>Modifier le joueur</h2>
-        <form id="formModifierJoueur" onsubmit="sauvegarderJoueur(event)">
-            <input type="hidden" id="joueur_id" name="id">
-            <div class="form-group">
-                <label for="nom">Nom:</label>
-                <input type="text" id="nom" name="nom" required>
-            </div>
-            <div class="form-group">
-                <label for="prenom">Prénom:</label>
-                <input type="text" id="prenom" name="prenom" required>
-            </div>
-            <div class="form-group">
-                <label for="numero_licence">Numéro de licence:</label>
-                <input type="text" id="numero_licence" name="numero_licence" required>
-            </div>
-            <div class="form-group">
-                <label for="date_naissance">Date de naissance:</label>
-                <input type="date" id="date_naissance" name="date_naissance" required>
-            </div>
-            <div class="form-group">
-                <label for="taille">Taille (cm):</label>
-                <input type="number" id="taille" name="taille" min="0" max="300">
-            </div>
-            <div class="form-group">
-                <label for="poids">Poids (kg):</label>
-                <input type="number" id="poids" name="poids" min="0" max="200">
-            </div>
-            <div class="form-group">
-                <label for="statut">Statut:</label>
-                <select id="statut" name="statut" required>
-                    <option value="Actif">Actif</option>
-                    <option value="Blessé">Blessé</option>
-                    <option value="Suspendu">Suspendu</option>
-                    <option value="Absent">Absent</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="poste_prefere">Poste préféré:</label>
-                <select id="poste_prefere" name="poste_prefere">
-                    <option value="Gardien">Gardien</option>
-                    <option value="Défenseur">Défenseur</option>
-                    <option value="Milieu">Milieu</option>
-                    <option value="Attaquant">Attaquant</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="nom">Nom:</label>
+                    <input type="text" id="nom" name="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom:</label>
+                    <input type="text" id="prenom" name="prenom" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero_licence">Numéro de licence:</label>
+                    <input type="text" id="numero_licence" name="numero_licence" required>
+                </div>
+                <div class="form-group">
+                    <label for="date_naissance">Date de naissance:</label>
+                    <input type="date" id="date_naissance" name="date_naissance" required>
+                </div>
+                <div class="form-group">
+                    <label for="taille">Taille (cm):</label>
+                    <input type="number" id="taille" name="taille" min="0" max="300">
+                </div>
+                <div class="form-group">
+                    <label for="poids">Poids (kg):</label>
+                    <input type="number" id="poids" name="poids" min="0" max="200">
+                </div>
+                <div class="form-group">
+                    <label for="statut">Statut:</label>
+                    <select id="statut" name="statut" required>
+                        <option value="Actif">Actif</option>
+                        <option value="Blessé">Blessé</option>
+                        <option value="Suspendu">Suspendu</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="poste_prefere">Poste préféré:</label>
+                    <select id="poste_prefere" name="poste_prefere">
+                        <option value="Gardien">Gardien</option>
+                        <option value="Défenseur">Défenseur</option>
+                        <option value="Milieu">Milieu</option>
+                        <option value="Attaquant">Attaquant</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-    <label for="commentaire">Commentaire</label>
-    <textarea id="commentaire" name="commentaire" rows="4" required style="width: 100%; resize: vertical;"></textarea>
-</div>
-<h3>Évaluer les joueurs</h3>
-        <form id="formEvaluerJoueurs" onsubmit="evaluerJoueurs(event)">
-            <div class="form-group">
-                <label for="eval_joueur_id">ID du Joueur:</label>
-                <input type="text" id="eval_joueur_id" name="joueur_id" required>
-            </div>
-            <div class="form-group">
-                <label for="eval_note">Note (sur 10):</label>
-                <input type="number" id="eval_note" name="note" min="0" max="10" required>
-            </div>
-            <button type="submit" class="btn-submit">Évaluer</button>
-        </form>
+                <!-- Section pour ajouter un commentaire -->
+                <h3>Commentaires</h3>
+                <div class="form-group">
+                    <textarea id="commentaire" name="commentaire" rows="4" required 
+                              style="width: 100%; resize: vertical;" 
+                              placeholder="Ajouter un commentaire..."></textarea>
+                </div>
+                <button type="button" class="btn-submit" onclick="posterCommentaire()">Ajouter un commentaire</button>
 
-            <button type="submit" class="btn-submit">Enregistrer</button>
-        </form>
+                <!-- Liste des commentaires -->
+                <div id="listeCommentaires">
+                    <ul id="commentaires"></ul>
+                </div>
+
+                <button type="submit" class="btn-submit">Enregistrer</button>
+            </form>
+        </div>
     </div>
-</div>
+
+
+    <script>
+
+        // Fonction pour ajouter un commentaire
+        function posterCommentaire() {
+            const commentaireInput = document.getElementById('commentaire');
+            const commentaireTexte = commentaireInput.value;
+
+            if (!commentaireTexte.trim()) {
+                alert('Le commentaire ne peut pas être vide.');
+                return;
+            }
+
+            // Obtenir la date et l'heure actuelles
+            const maintenant = new Date();
+            const dateTexte = maintenant.toLocaleDateString();
+            const heureTexte = maintenant.toLocaleTimeString();
+
+            // Créer un élément pour le commentaire
+            const commentaireElement = document.createElement('li');
+            commentaireElement.innerHTML = `
+                <p>${commentaireTexte}</p>
+                <span class="date">Posté le ${dateTexte} à ${heureTexte}</span>
+            `;
+
+            // Ajouter le commentaire à la liste
+            const listeCommentaires = document.getElementById('commentaires');
+            listeCommentaires.appendChild(commentaireElement);
+
+            // Réinitialiser le champ de commentaire
+            commentaireInput.value = '';
+        }
+    </script>
+
+
 
 <!-- Modal Statistiques -->
 <div id="modalStats" class="modal">
