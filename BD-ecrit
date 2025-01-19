@@ -1,0 +1,135 @@
+= Gestionnaire Équipe - Structure des Tables
+
+== Préambule
+
+Les tables ci-dessous définissent la structure de la base de données `gestionnaire_equipe`.
+
+== Table `commentaires_joueurs`
+
+[source,sql]
+----
+CREATE TABLE `commentaires_joueurs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `joueur_id` int NOT NULL,
+  `commentaire` text NOT NULL,
+  `date_creation` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `joueur_id` (`joueur_id`),
+  CONSTRAINT `commentaires_joueurs_ibfk_1` FOREIGN KEY (`joueur_id`) REFERENCES `joueurs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+----
+
+== Table `evaluations`
+
+[source,sql]
+----
+CREATE TABLE `evaluations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `match_id` int NOT NULL,
+  `joueur_id` int NOT NULL,
+  `note` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `match_id` (`match_id`),
+  KEY `joueur_id` (`joueur_id`),
+  CONSTRAINT `evaluations_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `matchs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `evaluations_ibfk_2` FOREIGN KEY (`joueur_id`) REFERENCES `joueurs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `evaluations_chk_1` CHECK ((`note` BETWEEN 1 AND 5))
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+----
+
+== Table `feuille_match`
+
+[source,sql]
+----
+CREATE TABLE `feuille_match` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `match_id` int DEFAULT NULL,
+  `joueur_id` int DEFAULT NULL,
+  `titulaire` tinyint(1) DEFAULT '0',
+  `remplacant` tinyint(1) DEFAULT '0',
+  `commentaire` text,
+  PRIMARY KEY (`id`),
+  KEY `match_id` (`match_id`),
+  KEY `joueur_id` (`joueur_id`),
+  CONSTRAINT `feuille_match_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `matchs` (`id`),
+  CONSTRAINT `feuille_match_ibfk_2` FOREIGN KEY (`joueur_id`) REFERENCES `joueurs` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+----
+
+== Table `joueurs`
+
+[source,sql]
+----
+CREATE TABLE `joueurs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nom` varchar(50) NOT NULL,
+  `prenom` varchar(50) NOT NULL,
+  `numero_licence` varchar(50) NOT NULL,
+  `date_naissance` date NOT NULL,
+  `taille` decimal(5,2) DEFAULT NULL,
+  `poids` decimal(5,2) DEFAULT NULL,
+  `statut` enum('Actif','Blessé','Suspendu','Absent') NOT NULL DEFAULT 'Actif',
+  `commentaires` text,
+  `categorie` enum('U6','U8','U10','U12','U14','U16','U18','U20','Seniors') NOT NULL,
+  `poste_prefere` enum('Pilier','Talonneur','Deuxième ligne','Troisième ligne','Demi de mêlée','Demi d''ouverture','Centre','Ailier','Arrière') NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `numero_licence` (`numero_licence`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+----
+
+== Table `matchs`
+
+[source,sql]
+----
+CREATE TABLE `matchs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `heure` time NOT NULL,
+  `equipe_adverse` varchar(100) NOT NULL,
+  `lieu` enum('Domicile','Extérieur') NOT NULL,
+  `resultat` varchar(10) DEFAULT NULL,
+  `categorie` enum('U6','U8','U10','U12','U14','U16','U18','U20','Seniors') DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+----
+
+== Table `selections`
+
+[source,sql]
+----
+CREATE TABLE `selections` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `match_id` int NOT NULL,
+  `joueur_id` int NOT NULL,
+  `statut` enum('Titulaire','Remplaçant') NOT NULL,
+  `poste_occupe` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `match_id` (`match_id`),
+  KEY `joueur_id` (`joueur_id`),
+  CONSTRAINT `selections_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `matchs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `selections_ibfk_2` FOREIGN KEY (`joueur_id`) REFERENCES `joueurs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+----
+
+== Table `statistiques_joueur`
+
+[source,sql]
+----
+CREATE TABLE `statistiques_joueur` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `joueur_id` int NOT NULL,
+  `match_id` int NOT NULL,
+  `temps_jeu` int DEFAULT '0',
+  `essais` int DEFAULT '0',
+  `passes_decisives` int DEFAULT '0',
+  `metres_gagnes` int DEFAULT '0',
+  `defenseurs_battus` int DEFAULT '0',
+  `plaquages_reussis` int DEFAULT '0',
+  `turnovers_gagnes` int DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `joueur_id` (`joueur_id`),
+  KEY `match_id` (`match_id`),
+  CONSTRAINT `statistiques_joueur_ibfk_1` FOREIGN KEY (`joueur_id`) REFERENCES `joueurs` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `statistiques_joueur_ibfk_2` FOREIGN KEY (`match_id`) REFERENCES `matchs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+----
