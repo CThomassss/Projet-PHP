@@ -18,14 +18,16 @@ function initializeTabButtons() {
 
 // Fonctions pour les matchs
 function ouvrirModalMatch(match = null) {
+    const modal = document.getElementById('modalMatch');
     if (match === null) {
-        const modal = document.getElementById('modalMatch');
         document.getElementById('formAjoutMatch').reset();
-        modal.style.display = 'block';
-    } else {
-        // Ouvrir directement le modal de modification
-        modifierMatch(event, match);
     }
+    modal.classList.add('active');
+}
+
+function fermerModalMatch() {
+    const modal = document.getElementById('modalMatch');
+    modal.classList.remove('active');
 }
 
 function ouvrirModalScore(match) {
@@ -54,7 +56,7 @@ function ouvrirModalScore(match) {
         chargerCompositionMatch(match.id);
 
         // Afficher le modal
-        modal.style.display = 'block';
+        modal.classList.add('active');
     } catch (error) {
         console.error('Erreur lors de l\'ouverture du modal:', error);
         console.error('Match data:', match);
@@ -89,8 +91,82 @@ function afficherJoueurs(containerId, joueurs) {
             <span class="player-name">${joueur.nom} ${joueur.prenom}</span>
             <span class="player-poste">${joueur.poste_prefere}</span>
         `;
+        
+        // Ajouter l'événement de clic pour ouvrir le modal des statistiques
+        joueurElement.addEventListener('click', () => {
+            ouvrirModalStatsJoueur(joueur, document.getElementById('score_match_id').value);
+        });
+        
         container.appendChild(joueurElement);
     });
+}
+
+function ouvrirModalStatsJoueur(joueur, matchId) {
+    const modal = document.getElementById('modalStatsJoueur');
+    const joueurInfo = document.getElementById('joueurMatchInfo');
+    
+    // Afficher les informations du joueur
+    joueurInfo.innerHTML = `
+        <p><strong>${joueur.nom} ${joueur.prenom}</strong></p>
+        <p>Poste: ${joueur.poste_prefere}</p>
+    `;
+    
+    // Remplir les champs cachés
+    document.getElementById('stats_match_id').value = matchId;
+    document.getElementById('stats_joueur_id').value = joueur.id;
+    
+    // Charger les statistiques existantes si disponibles
+    chargerStatsJoueur(joueur.id, matchId);
+    
+    modal.style.display = 'block';
+}
+
+function chargerStatsJoueur(joueurId, matchId) {
+    fetch(`matchs/get_stats_joueur.php?joueur_id=${joueurId}&match_id=${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.stats) {
+                // Remplir le formulaire avec les statistiques existantes
+                Object.keys(data.stats).forEach(key => {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = data.stats[key];
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+async function sauvegarderStatsJoueur(event) {
+    event.preventDefault();
+    
+    try {
+        const formData = new FormData(document.getElementById('formStatsJoueur'));
+        
+        const response = await fetch('matchs/save_stats_joueur.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            fermerModalStatsJoueur();
+            // Optionnel : recharger les statistiques affichées
+            chargerCompositionMatch(formData.get('match_id'));
+        } else {
+            alert(data.message || 'Erreur lors de la sauvegarde des statistiques');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la sauvegarde des statistiques');
+    }
+}
+
+function fermerModalStatsJoueur() {
+    const modal = document.getElementById('modalStatsJoueur');
+    modal.style.display = 'none';
 }
 
 async function modifierScore(event) {
@@ -121,7 +197,7 @@ async function modifierScore(event) {
 
 function fermerModalScore() {
     const modal = document.getElementById('modalScore');
-    modal.style.display = 'none';
+    modal.classList.remove('active');
 }
 
 // Fonctions pour les joueurs
@@ -215,7 +291,7 @@ window.onclick = function(event) {
     const modals = ['modalMatch', 'modalScore', 'modalFeuilleMatch', 'modalJoueur', 'modalStats'];
     modals.forEach(modalId => {
         if (event.target == document.getElementById(modalId)) {
-            document.getElementById(modalId).style.display = 'none';
+            document.getElementById(modalId).classList.remove('active');
         }
     });
 }

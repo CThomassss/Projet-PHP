@@ -470,3 +470,53 @@ if (!isset($stats)) {
         </div>
     </div>
 </div>
+
+<!-- Modal Statistiques Joueur -->
+<div id="modalStatsJoueur" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fermerModalStatsJoueur()">&times;</span>
+        <h2>Statistiques du joueur</h2>
+        <div id="joueurMatchInfo"></div>
+        <form id="formStatsJoueur" onsubmit="sauvegarderStatsJoueur(event)">
+            <input type="hidden" id="stats_match_id" name="match_id">
+            <input type="hidden" id="stats_joueur_id" name="joueur_id">
+            
+            <div class="form-group">
+                <label for="temps_jeu">Temps de jeu (minutes):</label>
+                <input type="number" id="temps_jeu" name="temps_jeu" min="0" max="80" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="essais">Essais:</label>
+                <input type="number" id="essais" name="essais" min="0" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="passes_decisives">Passes décisives:</label>
+                <input type="number" id="passes_decisives" name="passes_decisives" min="0" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="plaquages_reussis">Plaquages réussis:</label>
+                <input type="number" id="plaquages_reussis" name="plaquages_reussis" min="0" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="turnovers_gagnes">Turnovers gagnés:</label>
+                <input type="number" id="turnovers_gagnes" name="turnovers_gagnes" min="0" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="metres_gagnes">Mètres gagnés:</label>
+                <input type="number" id="metres_gagnes" name="metres_gagnes" min="0" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="defenseurs_battus">Défenseurs battus:</label>
+                <input type="number" id="defenseurs_battus" name="defenseurs_battus" min="0" value="0">
+            </div>
+            
+            <button type="submit" class="btn-submit">Enregistrer les statistiques</button>
+        </form>
+    </div>
+</div>

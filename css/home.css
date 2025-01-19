@@ -409,24 +409,65 @@ a {
    8. MODALS ET FORMULAIRES
 ============================================ */
 .modal {
-    display: none;
+    display: none; /* Garder uniquement cette déclaration */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.7);
     z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex; /* Utiliser une classe .active pour afficher le modal */
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background: var(--c-gray-800);
-    margin: 10% auto;
+    margin: 2rem auto;
     padding: 2rem;
     border-radius: 8px;
     width: 90%;
     max-width: 500px;
     position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Style spécifique pour le modal des statistiques joueur */
+#modalStatsJoueur .modal-content {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0 auto;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+#modalStatsJoueur .modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+#modalStatsJoueur .modal-content::-webkit-scrollbar-track {
+    background: var(--c-gray-800);
+    border-radius: 3px;
+}
+
+#modalStatsJoueur .modal-content::-webkit-scrollbar-thumb {
+    background: var(--c-gray-600);
+    border-radius: 3px;
+}
+
+/* Ajustement pour les grands écrans */
+@media (min-height: 900px) {
+    #modalStatsJoueur .modal-content {
+        margin: 2rem auto;
+    }
 }
 
 /* Bouton de fermeture */
@@ -1150,6 +1191,13 @@ h2, h3 {
     margin-bottom: 0.5rem;
     background: var(--c-gray-700);
     border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.player-item:hover {
+    background: var(--c-gray-600);
+    transform: translateY(-2px);
 }
 
 .player-name {
@@ -1159,6 +1207,13 @@ h2, h3 {
 .player-poste {
     color: var(--c-text-tertiary);
     font-size: 0.9rem;
+}
+
+#joueurMatchInfo {
+    background: var(--c-gray-700);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
 }
 
 /* ============================================
