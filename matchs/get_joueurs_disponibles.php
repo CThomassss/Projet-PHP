@@ -19,7 +19,16 @@ if (!isset($_GET['match_id'])) {
 
 try {
     $match_id = intval($_GET['match_id']);
-    $joueurs = getJoueursByMatch($pdo, $match_id);
+    
+    // Récupérer tous les joueurs actifs
+    $stmt = $pdo->prepare("
+        SELECT id, nom, prenom, poste_prefere
+        FROM joueurs
+        WHERE statut = 'Actif'
+        ORDER BY nom, prenom
+    ");
+    $stmt->execute();
+    $joueurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,

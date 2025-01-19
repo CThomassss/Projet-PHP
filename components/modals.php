@@ -195,139 +195,145 @@ if (!isset($stats)) {
 <div id="modalFeuilleMatch" class="modal">
     <div class="modal-content modal-large">
         <span class="close" onclick="fermerModalFeuilleMatch()">&times;</span>
-        <h2>Feuille de match</h2>
-        <div class="match-info-header">
-            <div class="match-details">
-                <span id="fm_date_match"></span>
-                <span id="fm_equipe_adverse"></span>
-                <span id="fm_lieu"></span>
+        <div class="modal-inner-content">
+            <h2>Feuille de match</h2>
+            <div class="match-info-header">
+                <p>Match contre <span id="equipe_adverse_feuille"></span></p>
+                <p>Le <span id="date_feuille"></span> à <span id="heure_feuille"></span></p>
+                <p>Lieu : <span id="lieu_feuille"></span></p>
+            </div>
+            <div class="composition-match">
+                <div class="joueurs-selection">
+                    <h3>Joueurs disponibles</h3>
+                    <div class="joueurs-list" id="joueursDisponibles">
+                        <!-- Les joueurs seront chargés dynamiquement ici -->
+                    </div>
+                </div>
+                <div class="equipe-composition">
+                    <div class="titulaires">
+                        <h3>Titulaires</h3>
+                        <div class="joueurs-list" id="joueursTitulaires">
+                            <p class="empty-message">Glissez les joueurs ici</p>
+                        </div>
+                    </div>
+                    <div class="remplacants">
+                        <h3>Remplaçants</h3>
+                        <div class="joueurs-list" id="joueursRemplacants">
+                            <p class="empty-message">Glissez les joueurs ici</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <form id="formFeuilleMatch" onsubmit="sauvegarderFeuilleMatch(event)">
-            <input type="hidden" id="fm_match_id" name="match_id">
-            <div class="joueurs-selection">
-                <div class="titulaires">
-                    <h3>Titulaires (max 15)</h3>
-                    <div class="joueurs-list" id="liste_titulaires"></div>
-                </div>
-                <div class="remplacants">
-                    <h3>Remplaçants (max 8)</h3>
-                    <div class="joueurs-list" id="liste_remplacants"></div>
-                </div>
-                <div class="autres-joueurs">
-                    <h3>Joueurs disponibles</h3>
-                    <div class="joueurs-list" id="liste_disponibles"></div>
-                </div>
+        <div class="buttons-container">
+            <button class="btn-submit" onclick="sauvegarderComposition()">Enregistrer la composition</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Joueur -->
+<div id="modalJoueur" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fermerModalJoueur()">&times;</span>
+        <h2>Modifier le joueur</h2>
+        <form id="formModifierJoueur" onsubmit="sauvegarderJoueur(event)">
+            <input type="hidden" id="joueur_id" name="id">
+
+            <div class="form-group">
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" required>
             </div>
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">Enregistrer la feuille de match</button>
+            <div class="form-group">
+                <label for="prenom">Prénom:</label>
+                <input type="text" id="prenom" name="prenom" required>
             </div>
+            <div class="form-group">
+                <label for="numero_licence">Numéro de licence:</label>
+                <input type="text" id="numero_licence" name="numero_licence" required>
+            </div>
+            <div class="form-group">
+                <label for="date_naissance">Date de naissance:</label>
+                <input type="date" id="date_naissance" name="date_naissance" required>
+            </div>
+            <div class="form-group">
+                <label for="taille">Taille (cm):</label>
+                <input type="number" id="taille" name="taille" min="0" max="300">
+            </div>
+            <div class="form-group">
+                <label for="poids">Poids (kg):</label>
+                <input type="number" id="poids" name="poids" min="0" max="200">
+            </div>
+            <div class="form-group">
+                <label for="statut">Statut:</label>
+                <select id="statut" name="statut" required>
+                    <option value="Actif">Actif</option>
+                    <option value="Blessé">Blessé</option>
+                    <option value="Suspendu">Suspendu</option>
+                    <option value="Absent">Absent</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="poste_prefere">Poste préféré:</label>
+                <select id="poste_prefere" name="poste_prefere">
+                    <option value="Gardien">Gardien</option>
+                    <option value="Défenseur">Défenseur</option>
+                    <option value="Milieu">Milieu</option>
+                    <option value="Attaquant">Attaquant</option>
+                </select>
+            </div>
+
+            <!-- Section pour ajouter un commentaire -->
+            <h3>Commentaires</h3>
+            <div class="form-group">
+                <textarea id="commentaire" name="commentaire" rows="4" required 
+                          style="width: 100%; resize: vertical;" 
+                          placeholder="Ajouter un commentaire..."></textarea>
+            </div>
+            <button type="button" class="btn-submit" onclick="posterCommentaire()">Ajouter un commentaire</button>
+
+            <!-- Liste des commentaires -->
+            <div id="listeCommentaires">
+                <ul id="commentaires"></ul>
+            </div>
+
+            <button type="submit" class="btn-submit">Enregistrer</button>
         </form>
     </div>
 </div>
-    <!-- Modal Joueur -->
-    <div id="modalJoueur" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fermerModalJoueur()">&times;</span>
-            <h2>Modifier le joueur</h2>
-            <form id="formModifierJoueur" onsubmit="sauvegarderJoueur(event)">
-                <input type="hidden" id="joueur_id" name="id">
-
-                <div class="form-group">
-                    <label for="nom">Nom:</label>
-                    <input type="text" id="nom" name="nom" required>
-                </div>
-                <div class="form-group">
-                    <label for="prenom">Prénom:</label>
-                    <input type="text" id="prenom" name="prenom" required>
-                </div>
-                <div class="form-group">
-                    <label for="numero_licence">Numéro de licence:</label>
-                    <input type="text" id="numero_licence" name="numero_licence" required>
-                </div>
-                <div class="form-group">
-                    <label for="date_naissance">Date de naissance:</label>
-                    <input type="date" id="date_naissance" name="date_naissance" required>
-                </div>
-                <div class="form-group">
-                    <label for="taille">Taille (cm):</label>
-                    <input type="number" id="taille" name="taille" min="0" max="300">
-                </div>
-                <div class="form-group">
-                    <label for="poids">Poids (kg):</label>
-                    <input type="number" id="poids" name="poids" min="0" max="200">
-                </div>
-                <div class="form-group">
-                    <label for="statut">Statut:</label>
-                    <select id="statut" name="statut" required>
-                        <option value="Actif">Actif</option>
-                        <option value="Blessé">Blessé</option>
-                        <option value="Suspendu">Suspendu</option>
-                        <option value="Absent">Absent</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="poste_prefere">Poste préféré:</label>
-                    <select id="poste_prefere" name="poste_prefere">
-                        <option value="Gardien">Gardien</option>
-                        <option value="Défenseur">Défenseur</option>
-                        <option value="Milieu">Milieu</option>
-                        <option value="Attaquant">Attaquant</option>
-                    </select>
-                </div>
-
-                <!-- Section pour ajouter un commentaire -->
-                <h3>Commentaires</h3>
-                <div class="form-group">
-                    <textarea id="commentaire" name="commentaire" rows="4" required 
-                              style="width: 100%; resize: vertical;" 
-                              placeholder="Ajouter un commentaire..."></textarea>
-                </div>
-                <button type="button" class="btn-submit" onclick="posterCommentaire()">Ajouter un commentaire</button>
-
-                <!-- Liste des commentaires -->
-                <div id="listeCommentaires">
-                    <ul id="commentaires"></ul>
-                </div>
-
-                <button type="submit" class="btn-submit">Enregistrer</button>
-            </form>
-        </div>
-    </div>
 
 
-    <script>
+<script>
 
-        // Fonction pour ajouter un commentaire
-        function posterCommentaire() {
-            const commentaireInput = document.getElementById('commentaire');
-            const commentaireTexte = commentaireInput.value;
+    // Fonction pour ajouter un commentaire
+    function posterCommentaire() {
+        const commentaireInput = document.getElementById('commentaire');
+        const commentaireTexte = commentaireInput.value;
 
-            if (!commentaireTexte.trim()) {
-                alert('Le commentaire ne peut pas être vide.');
-                return;
-            }
-
-            // Obtenir la date et l'heure actuelles
-            const maintenant = new Date();
-            const dateTexte = maintenant.toLocaleDateString();
-            const heureTexte = maintenant.toLocaleTimeString();
-
-            // Créer un élément pour le commentaire
-            const commentaireElement = document.createElement('li');
-            commentaireElement.innerHTML = `
-                <p>${commentaireTexte}</p>
-                <span class="date">Posté le ${dateTexte} à ${heureTexte}</span>
-            `;
-
-            // Ajouter le commentaire à la liste
-            const listeCommentaires = document.getElementById('commentaires');
-            listeCommentaires.appendChild(commentaireElement);
-
-            // Réinitialiser le champ de commentaire
-            commentaireInput.value = '';
+        if (!commentaireTexte.trim()) {
+            alert('Le commentaire ne peut pas être vide.');
+            return;
         }
-    </script>
+
+        // Obtenir la date et l'heure actuelles
+        const maintenant = new Date();
+        const dateTexte = maintenant.toLocaleDateString();
+        const heureTexte = maintenant.toLocaleTimeString();
+
+        // Créer un élément pour le commentaire
+        const commentaireElement = document.createElement('li');
+        commentaireElement.innerHTML = `
+            <p>${commentaireTexte}</p>
+            <span class="date">Posté le ${dateTexte} à ${heureTexte}</span>
+        `;
+
+        // Ajouter le commentaire à la liste
+        const listeCommentaires = document.getElementById('commentaires');
+        listeCommentaires.appendChild(commentaireElement);
+
+        // Réinitialiser le champ de commentaire
+        commentaireInput.value = '';
+    }
+</script>
 
 
 

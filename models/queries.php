@@ -50,29 +50,6 @@ function getAllJoueurs($pdo) {
     }
 }
 
-function getJoueursByMatch($pdo, $matchId) {
-    // Récupère tous les joueurs disponibles (statut Actif)
-    $stmt = $pdo->prepare("
-        SELECT 
-            j.*,
-            CASE 
-                WHEN fm.type IS NOT NULL THEN fm.type
-                ELSE 'disponible'
-            END as statut_match,
-            CASE 
-                WHEN fm.joueur_id IS NOT NULL THEN 1
-                ELSE 0
-            END as est_selectionne
-        FROM joueurs j
-        LEFT JOIN feuille_match fm ON j.id = fm.joueur_id AND fm.match_id = :match_id
-        WHERE j.statut = 'Actif'
-        ORDER BY est_selectionne DESC, j.nom, j.prenom
-    ");
-    
-    $stmt->execute(['match_id' => $matchId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
 // Requêtes pour les statistiques
 function getTeamStats($pdo) {
     $stats = [];

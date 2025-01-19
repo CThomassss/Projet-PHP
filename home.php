@@ -222,7 +222,7 @@ $stats['joueurs'] = getPlayerStats($pdo);
                         <span class="match-edit" onclick="modifierMatch(event, <?= htmlspecialchars(json_encode($match)) ?>)">
                             <i class="fas fa-pen edit-icon"></i>
                         </span>
-                        <div class="match-card-content" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
+                        <div class="match-card-content" onclick="ouvrirFeuilleMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
                             <div class="match-date">
                                 <?= date('d M Y', strtotime($match['date'])) ?>
                             </div>

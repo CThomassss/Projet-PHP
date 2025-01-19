@@ -23,14 +23,8 @@ function ouvrirModalMatch(match = null) {
         document.getElementById('formAjoutMatch').reset();
         modal.style.display = 'block';
     } else {
-        const modal = document.getElementById('modalFeuilleMatch');
-        document.getElementById('fm_match_id').value = match.id;
-        document.getElementById('fm_date_match').textContent = new Date(match.date).toLocaleDateString() + ' ' + match.heure;
-        document.getElementById('fm_equipe_adverse').textContent = match.equipe_adverse;
-        document.getElementById('fm_lieu').textContent = match.lieu;
-        
-        chargerJoueursDisponibles(match.id);
-        modal.style.display = 'block';
+        // Ouvrir directement le modal de modification
+        modifierMatch(event, match);
     }
 }
 
@@ -94,95 +88,6 @@ function fermerModalScore() {
     const modal = document.getElementById('modalScore');
     modal.style.display = 'none';
 }
-
-// Fonctions pour la feuille de match
-function creerElementJoueur(joueur) {
-    const div = document.createElement('div');
-    div.className = 'joueur-item';
-    div.draggable = true;
-    div.dataset.joueurId = joueur.id;
-    div.innerHTML = `
-        <div class="joueur-details">
-            <div class="joueur-nom">${joueur.nom} ${joueur.prenom}</div>
-            <div class="joueur-poste">${joueur.poste_prefere || ''}</div>
-        </div>
-    `;
-    return div;
-}
-
-async function chargerJoueursDisponibles(matchId) {
-    try {
-        const response = await fetch(`matchs/get_joueurs_disponibles.php?match_id=${matchId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.message || 'Erreur lors du chargement des joueurs');
-        }
-
-        const listeTitulaires = document.getElementById('liste_titulaires');
-        const listeRemplacants = document.getElementById('liste_remplacants');
-        const listeDisponibles = document.getElementById('liste_disponibles');
-        
-        // Vider les listes
-        listeTitulaires.innerHTML = '';
-        listeRemplacants.innerHTML = '';
-        listeDisponibles.innerHTML = '';
-
-        // Log pour débugger
-        console.log('Joueurs reçus:', data.joueurs);
-        
-        // Distribuer les joueurs dans les bonnes listes
-        data.joueurs.forEach(joueur => {
-            const joueurElement = creerElementJoueur(joueur);
-            
-            switch (joueur.statut_match) {
-                case 'titulaire':
-                    listeTitulaires.appendChild(joueurElement);
-                    break;
-                case 'remplacant':
-                    listeRemplacants.appendChild(joueurElement);
-                    break;
-                default:
-                    if (!joueur.est_selectionne) {
-                        listeDisponibles.appendChild(joueurElement);
-                    }
-                    break;
-            }
-        });
-        
-        rendreJoueursDraggable();
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur lors du chargement des joueurs');
-    }
-}
-
-function rendreJoueursDraggable() {
-    const joueursItems = document.querySelectorAll('.joueur-item');
-    const zones = document.querySelectorAll('.joueurs-list');
-    
-    joueursItems.forEach(item => {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragend', handleDragEnd);
-    });
-    
-    zones.forEach(zone => {
-        zone.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            zone.classList.add('drag-over');
-        });
-        zone.addEventListener('dragleave', (e) => {
-            zone.classList.remove('drag-over');
-        });
-        zone.addEventListener('dragover', handleDragOver);
-        zone.addEventListener('drop', handleDrop);
-    });
-}
-
-// ...existing code for all drag and drop functions...
 
 // Fonctions pour les joueurs
 function modifierJoueur(joueur) {
@@ -420,6 +325,195 @@ function chargerCommentaires(joueurId) {
             }
         })
         .catch(error => console.error('Erreur:', error));
+}
+
+// ...existing code...
+
+function ouvrirFeuilleMatch(match) {
+    const modal = document.getElementById('modalFeuilleMatch');
+    
+    // Remplir les informations du match
+    document.getElementById('equipe_adverse_feuille').textContent = match.equipe_adverse;
+    document.getElementById('date_feuille').textContent = new Date(match.date).toLocaleDateString();
+    document.getElementById('heure_feuille').textContent = match.heure;
+    document.getElementById('lieu_feuille').textContent = match.lieu;
+
+    // Charger les joueurs disponibles
+    chargerJoueursDisponibles(match.id);
+    
+    // Initialiser le drag & drop
+    initializeDragAndDrop();
+    
+    modal.style.display = 'block';
+}
+
+function initializeDragAndDrop() {
+    const joueurs = document.querySelectorAll('.joueur-item');
+    const zones = document.querySelectorAll('.joueurs-list');
+
+    joueurs.forEach(joueur => {
+        joueur.setAttribute('draggable', true);
+        joueur.addEventListener('dragstart', handleDragStart);
+        joueur.addEventListener('dragend', handleDragEnd);
+    });
+
+    zones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('drop', handleDrop);
+    });
+}
+
+function handleDragStart(e) {
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const joueurId = e.dataTransfer.getData('text/plain');
+    const joueur = document.getElementById(joueurId);
+    const zone = e.target.closest('.joueurs-list');
+    
+    if (zone && joueur) {
+        // Vérifier les limites (15 titulaires max, 8 remplaçants max)
+        if (zone.id === 'joueursTitulaires' && zone.children.length >= 15) {
+            alert('Maximum 15 titulaires atteint');
+            return;
+        }
+        if (zone.id === 'joueursRemplacants' && zone.children.length >= 8) {
+            alert('Maximum 8 remplaçants atteint');
+            return;
+        }
+        
+        zone.appendChild(joueur);
+        
+        // Cacher le message "empty" si présent
+        const emptyMessage = zone.querySelector('.empty-message');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
+    }
+}
+
+function sauvegarderComposition() {
+    const titulaires = [...document.getElementById('joueursTitulaires').children]
+        .filter(el => el.classList.contains('joueur-item'))
+        .map(el => el.dataset.joueurId);
+    
+    const remplacants = [...document.getElementById('joueursRemplacants').children]
+        .filter(el => el.classList.contains('joueur-item'))
+        .map(el => el.dataset.joueurId);
+    
+    // TODO: Ajouter l'appel API pour sauvegarder la composition
+    console.log('Titulaires:', titulaires);
+    console.log('Remplaçants:', remplacants);
+    
+    alert('Composition sauvegardée !');
+    fermerModalFeuilleMatch();
+}
+
+function chargerJoueursDisponibles(matchId) {
+    fetch(`matchs/get_joueurs_disponibles.php?match_id=${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('joueursDisponibles');
+                container.innerHTML = ''; // Vider la liste existante
+                
+                data.joueurs.forEach(joueur => {
+                    const joueurElement = document.createElement('div');
+                    joueurElement.className = 'joueur-item';
+                    joueurElement.id = `joueur-${joueur.id}`; // Ajouter un ID unique
+                    joueurElement.setAttribute('draggable', true); // Rendre l'élément draggable
+                    joueurElement.dataset.joueurId = joueur.id; // Stocker l'ID du joueur
+                    joueurElement.innerHTML = `
+                        <span class="joueur-nom">${joueur.nom} ${joueur.prenom}</span>
+                        <span class="joueur-poste">${joueur.poste_prefere}</span>
+                    `;
+                    
+                    // Ajouter les événements de drag
+                    joueurElement.addEventListener('dragstart', handleDragStart);
+                    joueurElement.addEventListener('dragend', handleDragEnd);
+                    
+                    container.appendChild(joueurElement);
+                });
+
+                // Initialiser les zones de drop
+                initializeDropZones();
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+function initializeDropZones() {
+    const zones = ['joueursDisponibles', 'joueursTitulaires', 'joueursRemplacants'];
+    
+    zones.forEach(zoneId => {
+        const zone = document.getElementById(zoneId);
+        if (zone) {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('drop', handleDrop);
+        }
+    });
+}
+
+function handleDragStart(e) {
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.joueur-item').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const joueurId = e.dataTransfer.getData('text/plain');
+    const joueurElement = document.getElementById(joueurId);
+    const zoneDepot = e.target.closest('.joueurs-list');
+    
+    if (joueurElement && zoneDepot) {
+        if (zoneDepot.id === 'joueursTitulaires') {
+            const nombreTitulaires = zoneDepot.querySelectorAll('.joueur-item').length;
+            if (nombreTitulaires >= 15) {
+                alert('Maximum 15 titulaires atteint');
+                return;
+            }
+        }
+        else if (zoneDepot.id === 'joueursRemplacants') {
+            const nombreRemplacants = zoneDepot.querySelectorAll('.joueur-item').length;
+            if (nombreRemplacants >= 8) {
+                alert('Maximum 8 remplaçants atteint');
+                return;
+            }
+        }
+
+        // Supprimer le message "empty" s'il existe
+        const emptyMessage = zoneDepot.querySelector('.empty-message');
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
+
+        // Déplacer le joueur
+        zoneDepot.appendChild(joueurElement);
+    }
 }
 
 // ...existing code...
