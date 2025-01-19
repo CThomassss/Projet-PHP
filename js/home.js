@@ -196,6 +196,9 @@ function modifierJoueur(joueur) {
         }
     });
     
+    // Charger les commentaires du joueur
+    chargerCommentaires(joueur.id);
+    
     modal.style.display = 'block';
 }
 
@@ -326,6 +329,97 @@ async function sauvegarderModifMatch(event) {
         console.error('Erreur:', error);
         alert('Erreur lors de la modification du match');
     }
+}
+
+function supprimerMatch() {
+    const matchId = document.getElementById('edit_match_id').value;
+    
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce match ?')) {
+        fetch('matchs/delete_match.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: matchId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fermerModalEditMatch();
+                window.location.reload();
+            } else {
+                alert(data.message || 'Erreur lors de la suppression du match');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la suppression du match');
+        });
+    }
+}
+
+// ...existing code...
+
+function posterCommentaire() {
+    const joueurId = document.getElementById('joueur_id').value;
+    const commentaireInput = document.getElementById('commentaire');
+    const commentaireTexte = commentaireInput.value;
+
+    if (!commentaireTexte.trim()) {
+        alert('Le commentaire ne peut pas être vide.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('joueur_id', joueurId);
+    formData.append('commentaire', commentaireTexte);
+
+    fetch('joueurs/add_commentaire.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Ajouter le nouveau commentaire à la liste
+            const maintenant = new Date();
+            const commentaireElement = document.createElement('li');
+            commentaireElement.innerHTML = `
+                <p>${commentaireTexte}</p>
+                <span class="date">Posté le ${maintenant.toLocaleDateString()} à ${maintenant.toLocaleTimeString()}</span>
+            `;
+            document.getElementById('commentaires').prepend(commentaireElement);
+            commentaireInput.value = '';
+        } else {
+            alert(data.message || 'Erreur lors de l\'ajout du commentaire');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'ajout du commentaire');
+    });
+}
+
+function chargerCommentaires(joueurId) {
+    fetch(`joueurs/get_commentaires.php?joueur_id=${joueurId}`)
+        .then(response => response.json())
+        .then(data => {
+            const listeCommentaires = document.getElementById('commentaires');
+            listeCommentaires.innerHTML = ''; // Vider la liste existante
+            
+            if (data.success && data.commentaires) {
+                data.commentaires.forEach(commentaire => {
+                    const commentaireElement = document.createElement('li');
+                    commentaireElement.innerHTML = `
+                        <p>${commentaire.commentaire}</p>
+                        <span class="date">Posté le ${new Date(commentaire.date_creation).toLocaleDateString()} 
+                        à ${new Date(commentaire.date_creation).toLocaleTimeString()}</span>
+                    `;
+                    listeCommentaires.appendChild(commentaireElement);
+                });
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
 }
 
 // ...existing code...

@@ -4,23 +4,28 @@ require_once '../config/database.php';
 header('Content-Type: application/json');
 
 try {
-    // Vérifier que l'identifiant est fourni
-    if (!isset($_POST['id'])) {
-        throw new Exception("L'identifiant du match est requis");
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($data['id'])) {
+        throw new Exception('ID du match non fourni');
     }
 
-    $id = $_POST['id'];
+    // Vérifier d'abord si le match existe
+    $stmt = $pdo->prepare("SELECT id FROM matchs WHERE id = ?");
+    $stmt->execute([$data['id']]);
+    if (!$stmt->fetch()) {
+        throw new Exception('Match non trouvé');
+    }
 
-    // Préparer et exécuter la requête de suppression
+    // Supprimer d'abord les références dans la feuille de match
+    $stmt = $pdo->prepare("DELETE FROM feuille_match WHERE match_id = ?");
+    $stmt->execute([$data['id']]);
+
+    // Supprimer le match
     $stmt = $pdo->prepare("DELETE FROM matchs WHERE id = ?");
-    $stmt->execute([$id]);
+    $stmt->execute([$data['id']]);
 
-    // Vérifier si la suppression a réussi
-    if ($stmt->rowCount() > 0) {
-        echo json_encode(['success' => true, 'message' => 'Match supprimé avec succès']);
-    } else {
-        throw new Exception("Aucun match trouvé avec cet identifiant");
-    }
+    echo json_encode(['success' => true]);
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([
