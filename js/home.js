@@ -522,44 +522,53 @@ function handleDrop(e) {
 
 function sauvegarderComposition() {
     const matchId = document.querySelector('#modalFeuilleMatch .modal-content').getAttribute('data-match-id');
-    console.log('ID du match récupéré:', matchId);
-
-    const titulaires = [...document.getElementById('joueursTitulaires').children]
-        .filter(el => el.classList.contains('joueur-item'))
-        .map(el => el.dataset.joueurId);
-    console.log('Titulaires:', titulaires);
-
-    const remplacants = [...document.getElementById('joueursRemplacants').children]
-        .filter(el => el.classList.contains('joueur-item'))
-        .map(el => el.dataset.joueurId);
-    console.log('Remplaçants:', remplacants);
-
-    const data = {
-        match_id: Number(matchId),
-        titulaires: titulaires,
-        remplacants: remplacants
+    
+    // Fonction helper pour récupérer les joueurs d'une catégorie
+    const getJoueursFromCategory = (categoryId) => {
+        return [...document.getElementById(categoryId).children]
+            .filter(el => el.classList.contains('joueur-item'))
+            .map(el => el.dataset.joueurId);
     };
 
-    console.log('Données à envoyer:', data);
+    // Récupérer tous les joueurs par catégorie
+    const composition = {
+        match_id: Number(matchId),
+        titulaires: {
+            premiere_ligne: getJoueursFromCategory('titulaires-premiere-ligne'),
+            deuxieme_ligne: getJoueursFromCategory('titulaires-deuxieme-ligne'),
+            troisieme_ligne: getJoueursFromCategory('titulaires-troisieme-ligne'),
+            demis: getJoueursFromCategory('titulaires-demis'),
+            trois_quarts: getJoueursFromCategory('titulaires-trois-quarts'),
+            arriere: getJoueursFromCategory('titulaires-arriere')
+        },
+        remplacants: {
+            premiere_ligne: getJoueursFromCategory('remplacants-premiere-ligne'),
+            deuxieme_ligne: getJoueursFromCategory('remplacants-deuxieme-ligne'),
+            troisieme_ligne: getJoueursFromCategory('remplacants-troisieme-ligne'),
+            backs: getJoueursFromCategory('remplacants-backs')
+        }
+    };
 
+    // Vérifier les limites
+    if (!verifierLimitesComposition(composition)) {
+        alert('Veuillez respecter les limites du nombre de joueurs par poste');
+        return;
+    }
+
+    // Envoyer la composition
     fetch('matchs/sauvegarder_composition.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(composition)
     })
-    .then(response => {
-        console.log('Statut de la réponse:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Réponse du serveur:', data);
         if (data.success) {
             alert('Composition sauvegardée avec succès !');
             fermerModalFeuilleMatch();
         } else {
-            console.error('Erreur serveur:', data);
             alert(data.message || 'Erreur lors de la sauvegarde de la composition');
         }
     })
@@ -567,6 +576,41 @@ function sauvegarderComposition() {
         console.error('Erreur:', error);
         alert('Erreur lors de la sauvegarde de la composition');
     });
+}
+
+function verifierLimitesComposition(composition) {
+    const limites = {
+        titulaires: {
+            premiere_ligne: 3,
+            deuxieme_ligne: 2,
+            troisieme_ligne: 3,
+            demis: 2,
+            trois_quarts: 4,
+            arriere: 1
+        },
+        remplacants: {
+            premiere_ligne: 2,
+            deuxieme_ligne: 1,
+            troisieme_ligne: 2,
+            backs: 3
+        }
+    };
+
+    // Vérifier les titulaires
+    for (const [poste, limite] of Object.entries(limites.titulaires)) {
+        if (composition.titulaires[poste].length > limite) {
+            return false;
+        }
+    }
+
+    // Vérifier les remplaçants
+    for (const [poste, limite] of Object.entries(limites.remplacants)) {
+        if (composition.remplacants[poste].length > limite) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function chargerJoueursDisponibles(matchId) {
@@ -580,26 +624,65 @@ function chargerJoueursDisponibles(matchId) {
                 data.joueurs.forEach(joueur => {
                     const joueurElement = document.createElement('div');
                     joueurElement.className = 'joueur-item';
-                    joueurElement.id = `joueur-${joueur.id}`; // Ajouter un ID unique
-                    joueurElement.setAttribute('draggable', true); // Rendre l'élément draggable
-                    joueurElement.dataset.joueurId = joueur.id; // Stocker l'ID du joueur
+                    joueurElement.id = `joueur-${joueur.id}`;
+                    joueurElement.setAttribute('draggable', true);
+                    joueurElement.dataset.joueurId = joueur.id;
+                    joueurElement.dataset.poste = joueur.poste_prefere.toLowerCase().replace(' ', '-');
                     joueurElement.innerHTML = `
                         <span class="joueur-nom">${joueur.nom} ${joueur.prenom}</span>
                         <span class="joueur-poste">${joueur.poste_prefere}</span>
                     `;
                     
-                    // Ajouter les événements de drag
                     joueurElement.addEventListener('dragstart', handleDragStart);
                     joueurElement.addEventListener('dragend', handleDragEnd);
                     
                     container.appendChild(joueurElement);
                 });
 
-                // Initialiser les zones de drop
+                // Initialiser le filtrage des joueurs
+                initializeMatchCategoryButtons();
                 initializeDropZones();
             }
         })
         .catch(error => console.error('Erreur:', error));
+}
+
+function initializeMatchCategoryButtons() {
+    const categoryButtons = document.querySelectorAll('.category-filters-match .category-btn');
+    const joueurs = document.querySelectorAll('#joueursDisponibles .joueur-item');
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Gérer l'état actif des boutons
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            const selectedCategory = button.dataset.category;
+            
+            // Filtrer les joueurs
+            joueurs.forEach(joueur => {
+                if (selectedCategory === 'all') {
+                    joueur.style.display = '';
+                } else {
+                    const posteJoueur = joueur.dataset.poste;
+                    joueur.style.display = matchPosteToCategory(posteJoueur, selectedCategory) ? '' : 'none';
+                }
+            });
+        });
+    });
+}
+
+function matchPosteToCategory(poste, category) {
+    const categories = {
+        'premiere-ligne': ['pilier', 'talonneur'],
+        'deuxieme-ligne': ['deuxième-ligne'],
+        'troisieme-ligne': ['troisième-ligne', 'flanker', 'numéro-8'],
+        'demis': ['demi-de-mêlée', 'demi-d\'ouverture'],
+        'trois-quarts': ['centre', 'ailier'],
+        'arriere': ['arrière']
+    };
+    
+    return categories[category]?.some(p => poste.includes(p.toLowerCase())) || false;
 }
 
 function initializeDropZones() {

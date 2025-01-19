@@ -226,6 +226,15 @@ if (!isset($stats)) {
             <div class="composition-match">
                 <div class="joueurs-selection">
                     <h3>Joueurs disponibles</h3>
+                    <div class="category-filters-match">
+                        <button class="category-btn active" data-category="all">Tous</button>
+                        <button class="category-btn" data-category="premiere-ligne">Première ligne</button>
+                        <button class="category-btn" data-category="deuxieme-ligne">Deuxième ligne</button>
+                        <button class="category-btn" data-category="troisieme-ligne">Troisième ligne</button>
+                        <button class="category-btn" data-category="demis">Demis</button>
+                        <button class="category-btn" data-category="trois-quarts">Trois-quarts</button>
+                        <button class="category-btn" data-category="arriere">Arrière</button>
+                    </div>
                     <div class="joueurs-list" id="joueursDisponibles">
                         <!-- Les joueurs seront chargés dynamiquement ici -->
                     </div>
@@ -233,14 +242,72 @@ if (!isset($stats)) {
                 <div class="equipe-composition">
                     <div class="titulaires">
                         <h3>Titulaires</h3>
-                        <div class="joueurs-list" id="joueursTitulaires">
-                            <p class="empty-message">Glissez les joueurs ici</p>
+                        <div class="composition-categories">
+                            <div class="poste-section">
+                                <h4>Première ligne</h4>
+                                <div class="joueurs-list" id="titulaires-premiere-ligne" data-max="3">
+                                    <p class="empty-message">Glissez les joueurs ici (max 3)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Deuxième ligne</h4>
+                                <div class="joueurs-list" id="titulaires-deuxieme-ligne" data-max="2">
+                                    <p class="empty-message">Glissez les joueurs ici (max 2)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Troisième ligne</h4>
+                                <div class="joueurs-list" id="titulaires-troisieme-ligne" data-max="3">
+                                    <p class="empty-message">Glissez les joueurs ici (max 3)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Demis</h4>
+                                <div class="joueurs-list" id="titulaires-demis" data-max="2">
+                                    <p class="empty-message">Glissez les joueurs ici (max 2)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Trois-quarts</h4>
+                                <div class="joueurs-list" id="titulaires-trois-quarts" data-max="4">
+                                    <p class="empty-message">Glissez les joueurs ici (max 4)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Arrière</h4>
+                                <div class="joueurs-list" id="titulaires-arriere" data-max="1">
+                                    <p class="empty-message">Glissez les joueurs ici (max 1)</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="remplacants">
                         <h3>Remplaçants</h3>
-                        <div class="joueurs-list" id="joueursRemplacants">
-                            <p class="empty-message">Glissez les joueurs ici</p>
+                        <div class="composition-categories">
+                            <div class="poste-section">
+                                <h4>Première ligne</h4>
+                                <div class="joueurs-list" id="remplacants-premiere-ligne" data-max="2">
+                                    <p class="empty-message">Glissez les joueurs ici (max 2)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Deuxième ligne</h4>
+                                <div class="joueurs-list" id="remplacants-deuxieme-ligne" data-max="1">
+                                    <p class="empty-message">Glissez les joueurs ici (max 1)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Troisième ligne</h4>
+                                <div class="joueurs-list" id="remplacants-troisieme-ligne" data-max="2">
+                                    <p class="empty-message">Glissez les joueurs ici (max 2)</p>
+                                </div>
+                            </div>
+                            <div class="poste-section">
+                                <h4>Demis/Trois-quarts/Arrière</h4>
+                                <div class="joueurs-list" id="remplacants-backs" data-max="3">
+                                    <p class="empty-message">Glissez les joueurs ici (max 3)</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -573,6 +573,37 @@ a {
     color: var(--c-gray-800);
 }
 
+.category-filters-match {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--c-gray-700);
+    border-radius: 4px;
+}
+
+.category-filters-match .category-btn {
+    background: var(--c-gray-800);
+    color: var(--c-text-tertiary);
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.category-filters-match .category-btn:hover {
+    background: var(--c-gray-600);
+    transform: translateY(-1px);
+}
+
+.category-filters-match .category-btn.active {
+    background: #8CBEB2;
+    color: var(--c-gray-800);
+}
+
 /* ============================================
    11. STATISTIQUES DÉTAILLÉES
 ============================================ */
@@ -1328,4 +1359,40 @@ h2, h3 {
 .delete-icon:hover {
     color: #ff4444;
 }
+
+/* ============================================
+   24. STYLES DE LA COMPOSITION DES CATÉGORIES
+============================================ */
+.composition-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.poste-section {
+    background: var(--c-gray-700);
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.poste-section h4 {
+    color: var(--c-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem;
+    background: var(--c-gray-800);
+    border-radius: 4px;
+}
+
+.poste-section .joueurs-list {
+    min-height: 50px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: var(--c-gray-800);
+    margin: 0;
+}
+```
+</copilot-edited-file> 
 
