@@ -127,7 +127,7 @@ if (!isset($stats)) {
     </div>
 </div>
 
-<!-- Modal Modification Match -->
+<!-- Modal Modification Matchs -->
 <div id="modalEditMatch" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fermerModalEditMatch()">&times;</span>
@@ -155,8 +155,11 @@ if (!isset($stats)) {
             </div>
             <button type="submit" class="btn-submit">Enregistrer les modifications</button>
         </form>
+        <!-- Bouton Supprimer -->
+        <button class="btn-delete" onclick="supprimerMatch()">Supprimer le match</button>
     </div>
 </div>
+
 
 <!-- Modal Score -->
 <div id="modalScore" class="modal">
