@@ -1,0 +1,108 @@
+= Modèle de Données pour la Base de Données de Gestion Sportive ( Faite au Debut ) 
+
+== Table : Joueur
+
+[cols="1,3", options="header"]
+|===
+| Nom de la colonne | Description
+
+| **id**
+| Clé primaire unique identifiant chaque joueur.
+
+| **nom**
+| Nom de famille du joueur.
+
+| **prénom**
+| Prénom du joueur.
+
+| **num_licence**
+| Numéro de licence unique associé au joueur.
+
+| **date_naissance**
+| Date de naissance du joueur (format `YYYY-MM-DD`).
+
+| **taille**
+| Taille du joueur en centimètres.
+
+| **poids**
+| Poids du joueur en kilogrammes.
+
+| **statut**
+| Statut actuel du joueur. Type ENUM : `"Actif"`, `"Blessé"`, `"Suspendu"`, `"Absent"`.
+|===
+
+== Table : Match
+
+[cols="1,3", options="header"]
+|===
+| Nom de la colonne | Description
+
+| **id**
+| Clé primaire unique identifiant chaque match.
+
+| **date**
+| Date de la rencontre (format `YYYY-MM-DD`).
+
+| **nom_equipe_adverse**
+| Nom de l'équipe adverse.
+
+| **lieu**
+| Lieu du match. Type ENUM : `"domicile"`, `"extérieur"`.
+
+| **résultat**
+| Résultat du match. Type ENUM : `"victoire"`, `"défaite"`, `"nul"`, `"en cours"`.
+|===
+
+== Table : Participation
+
+[cols="1,3", options="header"]
+|===
+| Nom de la colonne | Description
+
+| **id**
+| Clé primaire unique identifiant chaque participation.
+
+| **match_id**
+| Clé étrangère vers la table `Match`.
+
+| **joueur_id**
+| Clé étrangère vers la table `Joueur`.
+
+| **titulaire**
+| Boolean indiquant si le joueur est titulaire (`true`) ou remplaçant (`false`).
+
+| **poste**
+| Poste occupé par le joueur. Type ENUM : `"Attaquant"`, `"Défenseur"`, `"Gardien"`, etc.
+
+| **note**
+| Note attribuée au joueur, sur une échelle de 1 à 5 (ou autre échelle choisie).
+|===
+
+== Table : Commentaire
+
+[cols="1,3", options="header"]
+|===
+| Nom de la colonne | Description
+
+| **id**
+| Clé primaire unique identifiant chaque commentaire.
+
+| **commentaire**
+| Texte libre pour des commentaires et observations diverses.
+|===
+
+== Table : Utilisateur (Authentification du Coach)
+
+[cols="1,3", options="header"]
+|===
+| Nom de la colonne | Description
+
+| **id**
+| Clé primaire unique identifiant chaque utilisateur.
+
+| **nom_coach**
+| Nom d'utilisateur pour l'authentification du coach.
+
+| **mot_de_passe**
+| Mot de passe associé au coach pour l'accès sécurisé.
+|===
