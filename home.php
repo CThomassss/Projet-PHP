@@ -208,18 +208,21 @@ $stats['joueurs'] = getPlayerStats($pdo);
                 <div class="matches-container upcoming active">
                     <?php
                     foreach($upcoming_matches as $match): ?>
-                    <div class="match-card" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
-                        <div class="match-date">
-                            <?= date('d M Y', strtotime($match['date'])) ?>
-                        </div>
-                        <div class="match-teams">
-                            <span class="team-home">Notre équipe</span>
-                            <span class="vs">VS</span>
-                            <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
-                        </div>
-                        <div class="match-info">
-                            <span class="match-time"><?= date('H:i', strtotime($match['heure'])) ?></span>
-                            <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                    <div class="match-card">
+                        <i class="fas fa-pen edit-icon match-edit" onclick="modifierMatch(<?= htmlspecialchars(json_encode($match)) ?>)"></i>
+                        <div class="match-content" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
+                            <div class="match-date">
+                                <?= date('d M Y', strtotime($match['date'])) ?>
+                            </div>
+                            <div class="match-teams">
+                                <span class="team-home">Notre équipe</span>
+                                <span class="vs">VS</span>
+                                <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
+                            </div>
+                            <div class="match-info">
+                                <span class="match-time"><?= date('H:i', strtotime($match['heure'])) ?></span>
+                                <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                            </div>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -236,17 +239,20 @@ $stats['joueurs'] = getPlayerStats($pdo);
                             'resultat' => $match['resultat']
                         ];
                     ?>
-                    <div class="match-card" onclick='ouvrirModalScore(<?= json_encode($matchData) ?>)'>
-                        <div class="match-date">
-                            <?= date('d M Y', strtotime($match['date'])) ?>
-                        </div>
-                        <div class="match-teams">
-                            <span class="team-home">Notre équipe</span>
-                            <span class="score"><?= htmlspecialchars($match['resultat']) ?></span>
-                            <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
-                        </div>
-                        <div class="match-info">
-                            <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                    <div class="match-card">
+                        <i class="fas fa-pen edit-icon match-edit" onclick="modifierMatch(<?= htmlspecialchars(json_encode($matchData)) ?>)"></i>
+                        <div class="match-content" onclick='ouvrirModalScore(<?= json_encode($matchData) ?>)'>
+                            <div class="match-date">
+                                <?= date('d M Y', strtotime($match['date'])) ?>
+                            </div>
+                            <div class="match-teams">
+                                <span class="team-home">Notre équipe</span>
+                                <span class="score"><?= htmlspecialchars($match['resultat']) ?></span>
+                                <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
+                            </div>
+                            <div class="match-info">
+                                <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                            </div>
                         </div>
                     </div>
                     <?php endforeach; ?>
