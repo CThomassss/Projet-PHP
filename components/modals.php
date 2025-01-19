@@ -344,8 +344,8 @@ if (!isset($stats)) {
                 <input type="date" id="date_naissance" name="date_naissance" required>
             </div>
             <div class="form-group">
-                <label for="taille">Taille (cm):</label>
-                <input type="number" id="taille" name="taille" min="0" max="300">
+                <label for="taille">Taille (en cm):</label>
+                <input type="number" id="taille" name="taille" min="0" max="300" placeholder="Ex: 180">
             </div>
             <div class="form-group">
                 <label for="poids">Poids (kg):</label>
@@ -362,11 +362,42 @@ if (!isset($stats)) {
             </div>
             <div class="form-group">
                 <label for="poste_prefere">Poste préféré:</label>
-                <select id="poste_prefere" name="poste_prefere">
-                    <option value="Gardien">Gardien</option>
-                    <option value="Défenseur">Défenseur</option>
-                    <option value="Milieu">Milieu</option>
-                    <option value="Attaquant">Attaquant</option>
+                <select id="poste_prefere" name="poste_prefere" required>
+                    <!-- Postes de première ligne -->
+                    <optgroup label="Première ligne">
+                        <option value="Pilier gauche">Pilier gauche</option>
+                        <option value="Talonneur">Talonneur</option>
+                        <option value="Pilier droit">Pilier droit</option>
+                    </optgroup>
+                    
+                    <!-- Postes de deuxième ligne -->
+                    <optgroup label="Deuxième ligne">
+                        <option value="Deuxième ligne">Deuxième ligne</option>
+                    </optgroup>
+                    
+                    <!-- Postes de troisième ligne -->
+                    <optgroup label="Troisième ligne">
+                        <option value="Troisième ligne aile">Troisième ligne aile</option>
+                        <option value="Troisième ligne centre">Troisième ligne centre</option>
+                        <option value="Numéro 8">Numéro 8</option>
+                    </optgroup>
+                    
+                    <!-- Postes des demis -->
+                    <optgroup label="Demis">
+                        <option value="Demi de mêlée">Demi de mêlée</option>
+                        <option value="Demi d'ouverture">Demi d'ouverture</option>
+                    </optgroup>
+                    
+                    <!-- Postes des trois-quarts -->
+                    <optgroup label="Trois-quarts">
+                        <option value="Centre">Centre</option>
+                        <option value="Ailier">Ailier</option>
+                    </optgroup>
+                    
+                    <!-- Poste d'arrière -->
+                    <optgroup label="Arrière">
+                        <option value="Arrière">Arrière</option>
+                    </optgroup>
                 </select>
             </div>
 

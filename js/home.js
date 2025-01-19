@@ -263,6 +263,32 @@ function supprimerJoueur(id) {
 
 // ...existing code for all player-related functions...
 
+async function sauvegarderJoueur(event) {
+    event.preventDefault();
+    
+    try {
+        const formData = new FormData(document.getElementById('formModifierJoueur'));
+        
+        const response = await fetch('joueurs/save_joueur.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Fermer le modal et rafraîchir la page
+            fermerModalJoueur();
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la sauvegarde du joueur');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la sauvegarde du joueur');
+    }
+}
+
 // Fonctions pour les statistiques
 function ouvrirModalStats() {
     document.getElementById('modalStats').style.display = 'block';
@@ -465,154 +491,89 @@ function ouvrirFeuilleMatch(match) {
 }
 
 function initializeDragAndDrop() {
+    // Sélectionner tous les éléments joueur
     const joueurs = document.querySelectorAll('.joueur-item');
     const zones = document.querySelectorAll('.joueurs-list');
 
     joueurs.forEach(joueur => {
+        // Configurer les attributs et événements de drag pour chaque joueur
         joueur.setAttribute('draggable', true);
         joueur.addEventListener('dragstart', handleDragStart);
         joueur.addEventListener('dragend', handleDragEnd);
     });
 
     zones.forEach(zone => {
+        // Configurer les événements pour les zones de dépôt
+        zone.addEventListener('dragenter', handleDragEnter);
+        zone.addEventListener('dragleave', handleDragLeave);
         zone.addEventListener('dragover', handleDragOver);
         zone.addEventListener('drop', handleDrop);
     });
 }
 
 function handleDragStart(e) {
+    e.stopPropagation();
     e.target.classList.add('dragging');
     e.dataTransfer.setData('text/plain', e.target.id);
+    e.dataTransfer.effectAllowed = 'move';
 }
 
 function handleDragEnd(e) {
+    e.stopPropagation();
     e.target.classList.remove('dragging');
+    document.querySelectorAll('.joueurs-list').forEach(zone => {
+        zone.classList.remove('drag-over');
+    });
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    e.target.closest('.joueurs-list')?.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.target.closest('.joueurs-list')?.classList.remove('drag-over');
 }
 
 function handleDragOver(e) {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
 }
 
 function handleDrop(e) {
     e.preventDefault();
+    e.stopPropagation();
+    
+    const zone = e.target.closest('.joueurs-list');
+    if (!zone) return;
+    
+    zone.classList.remove('drag-over');
     const joueurId = e.dataTransfer.getData('text/plain');
     const joueur = document.getElementById(joueurId);
-    const zone = e.target.closest('.joueurs-list');
     
-    if (zone && joueur) {
-        // Vérifier les limites (15 titulaires max, 8 remplaçants max)
-        if (zone.id === 'joueursTitulaires' && zone.children.length >= 15) {
-            alert('Maximum 15 titulaires atteint');
-            return;
-        }
-        if (zone.id === 'joueursRemplacants' && zone.children.length >= 8) {
-            alert('Maximum 8 remplaçants atteint');
-            return;
-        }
-        
-        zone.appendChild(joueur);
-        
-        // Cacher le message "empty" si présent
-        const emptyMessage = zone.querySelector('.empty-message');
-        if (emptyMessage) {
-            emptyMessage.style.display = 'none';
-        }
-    }
-}
+    if (!joueur || !zone) return;
 
-function sauvegarderComposition() {
-    const matchId = document.querySelector('#modalFeuilleMatch .modal-content').getAttribute('data-match-id');
+    // Vérifier les limites de joueurs
+    const maxJoueurs = zone.dataset.max ? parseInt(zone.dataset.max) : Infinity;
+    const joueursActuels = zone.querySelectorAll('.joueur-item').length;
     
-    // Fonction helper pour récupérer les joueurs d'une catégorie
-    const getJoueursFromCategory = (categoryId) => {
-        return [...document.getElementById(categoryId).children]
-            .filter(el => el.classList.contains('joueur-item'))
-            .map(el => el.dataset.joueurId);
-    };
-
-    // Récupérer tous les joueurs par catégorie
-    const composition = {
-        match_id: Number(matchId),
-        titulaires: {
-            premiere_ligne: getJoueursFromCategory('titulaires-premiere-ligne'),
-            deuxieme_ligne: getJoueursFromCategory('titulaires-deuxieme-ligne'),
-            troisieme_ligne: getJoueursFromCategory('titulaires-troisieme-ligne'),
-            demis: getJoueursFromCategory('titulaires-demis'),
-            trois_quarts: getJoueursFromCategory('titulaires-trois-quarts'),
-            arriere: getJoueursFromCategory('titulaires-arriere')
-        },
-        remplacants: {
-            premiere_ligne: getJoueursFromCategory('remplacants-premiere-ligne'),
-            deuxieme_ligne: getJoueursFromCategory('remplacants-deuxieme-ligne'),
-            troisieme_ligne: getJoueursFromCategory('remplacants-troisieme-ligne'),
-            backs: getJoueursFromCategory('remplacants-backs')
-        }
-    };
-
-    // Vérifier les limites
-    if (!verifierLimitesComposition(composition)) {
-        alert('Veuillez respecter les limites du nombre de joueurs par poste');
+    if (joueursActuels >= maxJoueurs) {
+        alert(`Maximum ${maxJoueurs} joueurs dans cette zone`);
         return;
     }
 
-    // Envoyer la composition
-    fetch('matchs/sauvegarder_composition.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(composition)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Composition sauvegardée avec succès !');
-            fermerModalFeuilleMatch();
-        } else {
-            alert(data.message || 'Erreur lors de la sauvegarde de la composition');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Erreur lors de la sauvegarde de la composition');
-    });
+    // Déplacer le joueur
+    zone.appendChild(joueur);
+
+    // Cacher le message "empty" s'il existe
+    const emptyMessage = zone.querySelector('.empty-message');
+    if (emptyMessage) {
+        emptyMessage.style.display = 'none';
+    }
 }
 
-function verifierLimitesComposition(composition) {
-    const limites = {
-        titulaires: {
-            premiere_ligne: 3,
-            deuxieme_ligne: 2,
-            troisieme_ligne: 3,
-            demis: 2,
-            trois_quarts: 4,
-            arriere: 1
-        },
-        remplacants: {
-            premiere_ligne: 2,
-            deuxieme_ligne: 1,
-            troisieme_ligne: 2,
-            backs: 3
-        }
-    };
-
-    // Vérifier les titulaires
-    for (const [poste, limite] of Object.entries(limites.titulaires)) {
-        if (composition.titulaires[poste].length > limite) {
-            return false;
-        }
-    }
-
-    // Vérifier les remplaçants
-    for (const [poste, limite] of Object.entries(limites.remplacants)) {
-        if (composition.remplacants[poste].length > limite) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
+// Assurer que le drag and drop est initialisé après le chargement des joueurs
 function chargerJoueursDisponibles(matchId) {
     fetch(`matchs/get_joueurs_disponibles.php?match_id=${matchId}`)
         .then(response => response.json())
@@ -625,23 +586,18 @@ function chargerJoueursDisponibles(matchId) {
                     const joueurElement = document.createElement('div');
                     joueurElement.className = 'joueur-item';
                     joueurElement.id = `joueur-${joueur.id}`;
-                    joueurElement.setAttribute('draggable', true);
                     joueurElement.dataset.joueurId = joueur.id;
                     joueurElement.dataset.poste = joueur.poste_prefere.toLowerCase().replace(' ', '-');
                     joueurElement.innerHTML = `
                         <span class="joueur-nom">${joueur.nom} ${joueur.prenom}</span>
                         <span class="joueur-poste">${joueur.poste_prefere}</span>
                     `;
-                    
-                    joueurElement.addEventListener('dragstart', handleDragStart);
-                    joueurElement.addEventListener('dragend', handleDragEnd);
-                    
                     container.appendChild(joueurElement);
                 });
 
-                // Initialiser le filtrage des joueurs
+                // Initialiser le drag and drop après avoir chargé les joueurs
+                initializeDragAndDrop();
                 initializeMatchCategoryButtons();
-                initializeDropZones();
             }
         })
         .catch(error => console.error('Erreur:', error));

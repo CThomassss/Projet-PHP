@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<link rel="stylesheet" href="/Projet%20PHP/css/login.css">
+<link rel="stylesheet" href="/css/login.css">
 <div class="login-container">
     <style>
         body {
@@ -101,4 +101,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<?php require_once 'templates/footer.php'; ?>
+
