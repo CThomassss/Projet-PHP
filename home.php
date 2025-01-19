@@ -123,24 +123,32 @@ $stats['joueurs'] = getPlayerStats($pdo);
             <!-- Section Liste des Joueurs -->
             <section class="transfer-section">
                 <div class="transfer-section-header">
-                    <h2>Liste des Joueurs</h2>
-                    <?php if (empty($joueurs)): ?>
-                    <div class="alert alert-warning">
-                        Aucun joueur trouvé ou erreur lors du chargement des données.
+                    <div class="header-left">
+                        <h2>Liste des Joueurs</h2>
+                        <?php if (empty($joueurs)): ?>
+                        <div class="alert alert-warning">
+                            Aucun joueur trouvé ou erreur lors du chargement des données.
+                        </div>
+                        <?php endif; ?>
                     </div>
-                    <?php endif; ?>
-                    <div class="category-filters">
-                        <button class="category-btn active" data-category="all">Tous</button>
-                        <button class="category-btn" data-category="U6">U6</button>
-                        <button class="category-btn" data-category="U8">U8</button>
-                        <button class="category-btn" data-category="U10">U10</button>
-                        <button class="category-btn" data-category="U12">U12</button>
-                        <button class="category-btn" data-category="U14">U14</button>
-                        <button class="category-btn" data-category="U16">U16</button>
-                        <button class="category-btn" data-category="U18">U18</button>
-                        <button class="category-btn" data-category="U20">U20</button>
-                        <button class="category-btn" data-category="Seniors">Seniors</button>
+                    <div class="header-right">
+                        <button class="add-player-button" onclick="ouvrirModalAjoutJoueur()">
+                            <i class="fas fa-plus"></i>
+                            Ajouter un joueur
+                        </button>
                     </div>
+                </div>
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="all">Tous</button>
+                    <button class="category-btn" data-category="U6">U6</button>
+                    <button class="category-btn" data-category="U8">U8</button>
+                    <button class="category-btn" data-category="U10">U10</button>
+                    <button class="category-btn" data-category="U12">U12</button>
+                    <button class="category-btn" data-category="U14">U14</button>
+                    <button class="category-btn" data-category="U16">U16</button>
+                    <button class="category-btn" data-category="U18">U18</button>
+                    <button class="category-btn" data-category="U20">U20</button>
+                    <button class="category-btn" data-category="Seniors">Seniors</button>
                 </div>
                 <div class="transfers">
                     <table class="players-table">
@@ -176,7 +184,10 @@ $stats['joueurs'] = getPlayerStats($pdo);
                                     <td><?= htmlspecialchars($joueur['statut']) ?></td>
                                     <td><?= htmlspecialchars($poste) ?></td>
                                     <td>
-                                        <i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
+                                        <div class="action-buttons">
+                                            <i onclick='modifierJoueur(<?= json_encode($joueur) ?>)' class="fas fa-pen edit-icon"></i>
+                                            <i onclick='supprimerJoueur(<?= $joueur["id"] ?>)' class="fas fa-times delete-icon"></i>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php 
@@ -206,11 +217,12 @@ $stats['joueurs'] = getPlayerStats($pdo);
                 </div>
                 
                 <div class="matches-container upcoming active">
-                    <?php
-                    foreach($upcoming_matches as $match): ?>
+                    <?php foreach($upcoming_matches as $match): ?>
                     <div class="match-card">
-                        <i class="fas fa-pen edit-icon match-edit" onclick="modifierMatch(<?= htmlspecialchars(json_encode($match)) ?>)"></i>
-                        <div class="match-content" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
+                        <span class="match-edit" onclick="modifierMatch(event, <?= htmlspecialchars(json_encode($match)) ?>)">
+                            <i class="fas fa-pen edit-icon"></i>
+                        </span>
+                        <div class="match-card-content" onclick="ouvrirModalMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
                             <div class="match-date">
                                 <?= date('d M Y', strtotime($match['date'])) ?>
                             </div>
@@ -230,7 +242,6 @@ $stats['joueurs'] = getPlayerStats($pdo);
 
                 <div class="matches-container past">
                     <?php foreach($past_matches as $match): 
-                        // Préparer les données pour le JSON
                         $matchData = [
                             'id' => $match['id'],
                             'date' => $match['date'],
@@ -240,8 +251,10 @@ $stats['joueurs'] = getPlayerStats($pdo);
                         ];
                     ?>
                     <div class="match-card">
-                        <i class="fas fa-pen edit-icon match-edit" onclick="modifierMatch(<?= htmlspecialchars(json_encode($matchData)) ?>)"></i>
-                        <div class="match-content" onclick='ouvrirModalScore(<?= json_encode($matchData) ?>)'>
+                        <!-- Icône de modification séparée du contenu -->
+                        <i class="fas fa-pen edit-icon match-edit" onclick="modifierMatch(event, <?= htmlspecialchars(json_encode($matchData)) ?>)"></i>
+                        <!-- Contenu du match avec son propre gestionnaire de clic -->
+                        <div class="match-card-content" onclick='ouvrirModalScore(<?= json_encode($matchData) ?>)'>
                             <div class="match-date">
                                 <?= date('d M Y', strtotime($match['date'])) ?>
                             </div>

@@ -127,6 +127,37 @@ if (!isset($stats)) {
     </div>
 </div>
 
+<!-- Modal Modification Match -->
+<div id="modalEditMatch" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fermerModalEditMatch()">&times;</span>
+        <h2>Modifier le match</h2>
+        <form id="formEditMatch" onsubmit="sauvegarderModifMatch(event)">
+            <input type="hidden" id="edit_match_id" name="id">
+            <div class="form-group">
+                <label for="edit_date">Date:</label>
+                <input type="date" id="edit_date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_heure">Heure:</label>
+                <input type="time" id="edit_heure" name="heure" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_equipe_adverse">Équipe adverse:</label>
+                <input type="text" id="edit_equipe_adverse" name="equipe_adverse" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_lieu">Lieu:</label>
+                <select id="edit_lieu" name="lieu" required>
+                    <option value="Domicile">Domicile</option>
+                    <option value="Exterieur">Extérieur</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+        </form>
+    </div>
+</div>
+
 <!-- Modal Score -->
 <div id="modalScore" class="modal">
     <div class="modal-content">

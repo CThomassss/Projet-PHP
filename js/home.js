@@ -199,6 +199,44 @@ function modifierJoueur(joueur) {
     modal.style.display = 'block';
 }
 
+function ouvrirModalAjoutJoueur() {
+    const modal = document.getElementById('modalJoueur');
+    const form = document.getElementById('formModifierJoueur');
+    
+    // Réinitialiser le formulaire
+    form.reset();
+    
+    // Retirer l'ID du joueur pour indiquer qu'il s'agit d'un nouvel enregistrement
+    document.getElementById('joueur_id').value = '';
+    
+    // Afficher le modal
+    modal.style.display = 'block';
+}
+
+function supprimerJoueur(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')) {
+        fetch('joueurs/delete_joueur.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Erreur lors de la suppression du joueur');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la suppression du joueur');
+        });
+    }
+}
+
 // ...existing code for all player-related functions...
 
 // Fonctions pour les statistiques
@@ -238,3 +276,56 @@ window.onclick = function(event) {
         }
     });
 }
+
+// ...existing code...
+
+function modifierMatch(event, match) {
+    // Empêcher la propagation de l'événement
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Ouvrir le modal de modification
+    const modal = document.getElementById('modalEditMatch');
+    
+    // Remplir le formulaire avec les données du match
+    document.getElementById('edit_match_id').value = match.id;
+    document.getElementById('edit_date').value = match.date;
+    document.getElementById('edit_heure').value = match.heure;
+    document.getElementById('edit_equipe_adverse').value = match.equipe_adverse;
+    document.getElementById('edit_lieu').value = match.lieu;
+    
+    // Afficher le modal
+    modal.style.display = 'block';
+}
+
+function fermerModalEditMatch() {
+    const modal = document.getElementById('modalEditMatch');
+    modal.style.display = 'none';
+}
+
+async function sauvegarderModifMatch(event) {
+    event.preventDefault();
+    
+    try {
+        const formData = new FormData(document.getElementById('formEditMatch'));
+        
+        const response = await fetch('matchs/update_match.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            fermerModalEditMatch();
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la modification du match');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la modification du match');
+    }
+}
+
+// ...existing code...
