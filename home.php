@@ -223,6 +223,8 @@ $stats['joueurs'] = getPlayerStats($pdo);
                             <i class="fas fa-pen edit-icon"></i>
                         </span>
                         <div class="match-card-content" onclick="ouvrirFeuilleMatch(<?= htmlspecialchars(json_encode($match)) ?>)">
+                            <!-- Ajout de l'ID du match dans un attribut data -->
+                            <input type="hidden" class="match-id" value="<?= $match['id'] ?>">
                             <div class="match-date">
                                 <?= date('d M Y', strtotime($match['date'])) ?>
                             </div>

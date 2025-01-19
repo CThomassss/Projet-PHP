@@ -163,31 +163,52 @@ if (!isset($stats)) {
 
 <!-- Modal Score -->
 <div id="modalScore" class="modal">
-    <div class="modal-content">
+    <div class="modal-content modal-large">
         <span class="close" onclick="fermerModalScore()">&times;</span>
-        <h2>Résultat du match</h2>
-        <form id="formModifierScore" onsubmit="modifierScore(event)">
-            <input type="hidden" id="score_match_id" name="id">
-            <div class="match-details">
-                <div class="equipes">
-                    <span class="team-home">Notre équipe</span>
-                    <span class="vs">VS</span>
-                    <span class="team-away" id="score_equipe_adverse_display"></span>
+        <div class="modal-inner-content">
+            <h2>Résultat du match</h2>
+            <form id="formModifierScore" onsubmit="modifierScore(event)">
+                <input type="hidden" id="score_match_id" name="id">
+                <div class="match-details">
+                    <div class="equipes">
+                        <span class="team-home">Notre équipe</span>
+                        <span class="vs">VS</span>
+                        <span class="team-away" id="score_equipe_adverse_display"></span>
+                    </div>
+                    <div class="date-lieu">
+                        <span id="score_date_display"></span>
+                        <span id="score_lieu_display"></span>
+                    </div>
                 </div>
-                <div class="date-lieu">
-                    <span id="score_date_display"></span>
-                    <span id="score_lieu_display"></span>
+                
+                <div class="score-section">
+                    <h3>Score</h3>
+                    <div class="form-group score-inputs">
+                        <input type="text" id="score_resultat" name="resultat" placeholder="Score (ex: 24-12)" pattern="[0-9]+-[0-9]+" title="Format: xx-xx" required>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="score-section">
-                <h3>Score</h3>
-                <div class="form-group score-inputs">
-                    <input type="text" id="score_resultat" name="resultat" placeholder="Score (ex: 24-12)" pattern="[0-9]+-[0-9]+" title="Format: xx-xx" required>
+
+                <div class="composition-section">
+                    <div class="players-columns">
+                        <div class="titulaires-column">
+                            <h3>Titulaires</h3>
+                            <div class="players-list" id="score_titulaires">
+                                <!-- Liste des titulaires -->
+                            </div>
+                        </div>
+                        <div class="remplacants-column">
+                            <h3>Remplaçants</h3>
+                            <div class="players-list" id="score_remplacants">
+                                <!-- Liste des remplaçants -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn-submit">Enregistrer</button>
-        </form>
+            </form>
+        </div>
+        <div class="buttons-container">
+            <button type="submit" class="btn-submit" form="formModifierScore">Enregistrer le score</button>
+        </div>
     </div>
 </div>
 

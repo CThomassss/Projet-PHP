@@ -50,12 +50,47 @@ function ouvrirModalScore(match) {
         document.getElementById('score_lieu_display').textContent = match.lieu;
         document.getElementById('score_resultat').value = match.resultat || '';
 
+        // Charger la composition de l'équipe
+        chargerCompositionMatch(match.id);
+
         // Afficher le modal
         modal.style.display = 'block';
     } catch (error) {
         console.error('Erreur lors de l\'ouverture du modal:', error);
         console.error('Match data:', match);
     }
+}
+
+function chargerCompositionMatch(matchId) {
+    fetch(`matchs/get_composition.php?match_id=${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                afficherJoueurs('score_titulaires', data.titulaires);
+                afficherJoueurs('score_remplacants', data.remplacants);
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+function afficherJoueurs(containerId, joueurs) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    if (joueurs.length === 0) {
+        container.innerHTML = '<p class="empty-message">Aucun joueur sélectionné</p>';
+        return;
+    }
+
+    joueurs.forEach(joueur => {
+        const joueurElement = document.createElement('div');
+        joueurElement.className = 'player-item';
+        joueurElement.innerHTML = `
+            <span class="player-name">${joueur.nom} ${joueur.prenom}</span>
+            <span class="player-poste">${joueur.poste_prefere}</span>
+        `;
+        container.appendChild(joueurElement);
+    });
 }
 
 async function modifierScore(event) {
@@ -332,6 +367,10 @@ function chargerCommentaires(joueurId) {
 function ouvrirFeuilleMatch(match) {
     const modal = document.getElementById('modalFeuilleMatch');
     
+    // Stocker l'ID du match dans un champ caché
+    const matchId = match.id;
+    modal.querySelector('.modal-content').setAttribute('data-match-id', matchId);
+    
     // Remplir les informations du match
     document.getElementById('equipe_adverse_feuille').textContent = match.equipe_adverse;
     document.getElementById('date_feuille').textContent = new Date(match.date).toLocaleDateString();
@@ -339,10 +378,7 @@ function ouvrirFeuilleMatch(match) {
     document.getElementById('lieu_feuille').textContent = match.lieu;
 
     // Charger les joueurs disponibles
-    chargerJoueursDisponibles(match.id);
-    
-    // Initialiser le drag & drop
-    initializeDragAndDrop();
+    chargerJoueursDisponibles(matchId);
     
     modal.style.display = 'block';
 }
@@ -404,20 +440,52 @@ function handleDrop(e) {
 }
 
 function sauvegarderComposition() {
+    const matchId = document.querySelector('#modalFeuilleMatch .modal-content').getAttribute('data-match-id');
+    console.log('ID du match récupéré:', matchId);
+
     const titulaires = [...document.getElementById('joueursTitulaires').children]
         .filter(el => el.classList.contains('joueur-item'))
         .map(el => el.dataset.joueurId);
-    
+    console.log('Titulaires:', titulaires);
+
     const remplacants = [...document.getElementById('joueursRemplacants').children]
         .filter(el => el.classList.contains('joueur-item'))
         .map(el => el.dataset.joueurId);
-    
-    // TODO: Ajouter l'appel API pour sauvegarder la composition
-    console.log('Titulaires:', titulaires);
     console.log('Remplaçants:', remplacants);
-    
-    alert('Composition sauvegardée !');
-    fermerModalFeuilleMatch();
+
+    const data = {
+        match_id: Number(matchId),
+        titulaires: titulaires,
+        remplacants: remplacants
+    };
+
+    console.log('Données à envoyer:', data);
+
+    fetch('matchs/sauvegarder_composition.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Statut de la réponse:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Réponse du serveur:', data);
+        if (data.success) {
+            alert('Composition sauvegardée avec succès !');
+            fermerModalFeuilleMatch();
+        } else {
+            console.error('Erreur serveur:', data);
+            alert(data.message || 'Erreur lors de la sauvegarde de la composition');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la sauvegarde de la composition');
+    });
 }
 
 function chargerJoueursDisponibles(matchId) {
@@ -513,6 +581,24 @@ function handleDrop(e) {
 
         // Déplacer le joueur
         zoneDepot.appendChild(joueurElement);
+    }
+}
+
+// ...existing code...
+
+function fermerModalFeuilleMatch() {
+    const modal = document.getElementById('modalFeuilleMatch');
+    if (modal) {
+        modal.style.display = 'none';
+        
+        // Réinitialiser les listes
+        const titulaires = document.getElementById('joueursTitulaires');
+        const remplacants = document.getElementById('joueursRemplacants');
+        const disponibles = document.getElementById('joueursDisponibles');
+        
+        if (titulaires) titulaires.innerHTML = '<p class="empty-message">Glissez les joueurs ici</p>';
+        if (remplacants) remplacants.innerHTML = '<p class="empty-message">Glissez les joueurs ici</p>';
+        if (disponibles) disponibles.innerHTML = '';
     }
 }
 

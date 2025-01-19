@@ -1117,6 +1117,50 @@ h2, h3 {
     border-radius: 3px;
 }
 
+/* Styles pour le modal de score */
+.composition-section {
+    margin-top: 2rem;
+    background: var(--c-gray-700);
+    border-radius: 4px;
+    padding: 1.5rem;
+}
+
+.players-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.titulaires-column,
+.remplacants-column {
+    background: var(--c-gray-800);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.players-list {
+    margin-top: 1rem;
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--c-gray-700);
+    border-radius: 4px;
+}
+
+.player-name {
+    font-weight: 500;
+}
+
+.player-poste {
+    color: var(--c-text-tertiary);
+    font-size: 0.9rem;
+}
+
 /* ============================================
    20. STYLES DES ICÔNES ET ACTIONS
 ============================================ */
