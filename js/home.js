@@ -229,7 +229,12 @@ function ouvrirModalAjoutJoueur() {
     document.getElementById('joueur_id').value = '';
     
     // Afficher le modal
-    modal.style.display = 'block';
+    modal.classList.add('active'); // Changé de style.display = 'block' à classList.add('active')
+}
+
+function fermerModalJoueur() {
+    const modal = document.getElementById('modalJoueur');
+    modal.classList.remove('active'); // Changé de style.display = 'none' à classList.remove('active')
 }
 
 function supprimerJoueur(id) {
@@ -675,6 +680,34 @@ function fermerModalFeuilleMatch() {
         if (titulaires) titulaires.innerHTML = '<p class="empty-message">Glissez les joueurs ici</p>';
         if (remplacants) remplacants.innerHTML = '<p class="empty-message">Glissez les joueurs ici</p>';
         if (disponibles) disponibles.innerHTML = '';
+    }
+}
+
+// ...existing code...
+
+async function ajouterMatch(event) {
+    event.preventDefault();
+    
+    try {
+        const formData = new FormData(document.getElementById('formAjoutMatch'));
+        
+        const response = await fetch('matchs/ajouter.php', { // Changé de create_match.php à ajouter.php
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Fermer le modal et rafraîchir la page
+            fermerModalMatch();
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la création du match');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la création du match');
     }
 }
 
