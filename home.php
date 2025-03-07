@@ -8,6 +8,10 @@ if (!isset($_SESSION['utilisateur_id'])) {
     exit();
 }
 
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 require_once './config/database.php';
 require_once './lib/functions.php';
 require_once './models/queries.php';
@@ -25,8 +29,9 @@ $joueurs = getAllJoueurs($pdo);
 // Récupération des statistiques
 $stats = getTeamStats($pdo);
 $stats['joueurs'] = getPlayerStats($pdo);
-?>
 
+
+?>
 <!-- ============================================
    2. EN-TÊTE HTML
 ============================================ -->
@@ -262,11 +267,11 @@ $stats['joueurs'] = getPlayerStats($pdo);
                             </div>
                             <div class="match-teams">
                                 <span class="team-home">Notre équipe</span>
-                                <span class="score"><?= htmlspecialchars($match['resultat']) ?></span>
-                                <span class="team-away"><?= htmlspecialchars($match['equipe_adverse']) ?></span>
+                                <span class="score"><?= htmlspecialchars($match['resultat'] ?? '-') ?></span>
+                                <span class="team-away"><?= htmlspecialchars($match['equipe_adverse'] ?? 'Équipe non spécifiée') ?></span>
                             </div>
                             <div class="match-info">
-                                <span class="match-location"><?= htmlspecialchars($match['lieu']) ?></span>
+                                <span class="match-location"><?= htmlspecialchars($match['lieu'] ?? 'Lieu non spécifié') ?></span>
                             </div>
                         </div>
                     </div>

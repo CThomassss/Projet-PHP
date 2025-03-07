@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 function getJoueurs($pdo) {
     $sql = "SELECT *, 
             CASE 
@@ -31,6 +35,11 @@ function getJoueurById($pdo, $id) {
 }
 
 function ajouterJoueur($pdo, $data) {
+    // S'assurer que la taille est en centimètres
+    if (isset($data['taille']) && $data['taille'] < 3) {
+        $data['taille'] = round($data['taille'] * 100);
+    }
+
     $sql = "INSERT INTO joueurs (nom, prenom, numero_licence, date_naissance, taille, poids, statut, commentaires, poste_prefere) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
@@ -48,24 +57,40 @@ function ajouterJoueur($pdo, $data) {
 }
 
 function modifierJoueur($pdo, $id, $data) {
-    $sql = "UPDATE joueurs SET 
-            nom = ?, prenom = ?, numero_licence = ?, date_naissance = ?, 
-            taille = ?, poids = ?, statut = ?, commentaires = ?, poste_prefere = ? 
-            WHERE id = ?";
+    // S'assurer que la taille est en centimètres si elle est fournie
+    if (isset($data['taille']) && $data['taille'] < 3) {
+        $data['taille'] = round($data['taille'] * 100);
+    }
+
+    // Construire la requête SQL dynamiquement
+    $updates = [];
+    $params = [];
+    
+    // Liste des champs possibles
+    $fields = ['nom', 'prenom', 'numero_licence', 'date_naissance', 
+               'taille', 'poids', 'statut', 'commentaires', 'poste_prefere'];
+    
+    // Ajouter uniquement les champs qui sont présents dans $data
+    foreach ($fields as $field) {
+        if (isset($data[$field])) {
+            $updates[] = "$field = ?";
+            $params[] = $data[$field];
+        }
+    }
+    
+    // Si aucun champ à mettre à jour
+    if (empty($updates)) {
+        return true;
+    }
+    
+    // Ajouter l'ID à la fin des paramètres
+    $params[] = $id;
+    
+    $sql = "UPDATE joueurs SET " . implode(', ', $updates) . " WHERE id = ?";
     $stmt = $pdo->prepare($sql);
+    
     try {
-        return $stmt->execute([
-            $data['nom'] ?? null,
-            $data['prenom'] ?? null,
-            $data['numero_licence'] ?? null,
-            $data['date_naissance'] ?? null,
-            $data['taille'] ?? null,
-            $data['poids'] ?? null,
-            $data['statut'] ?? null,
-            $data['commentaires'] ?? null,
-            $data['poste_prefere'] ?? null,
-            $id
-        ]);
+        return $stmt->execute($params);
     } catch (PDOException $e) {
         error_log("Erreur SQL: " . $e->getMessage());
         return false;

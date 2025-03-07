@@ -19,85 +19,49 @@ if (!isset($_SESSION['utilisateur_id'])) {
     exit;
 }
 
-// Récupérer les données brutes
-$rawData = file_get_contents('php://input');
-error_log("Données brutes reçues : " . $rawData);
+$data = json_decode(file_get_contents('php://input'), true);
 
-$data = json_decode($rawData, true);
-error_log("Données décodées : " . print_r($data, true));
-
-// Vérification des données
-error_log("Validation des données :");
-error_log("match_id présent : " . (isset($data['match_id']) ? 'oui' : 'non'));
-error_log("match_id valeur : " . ($data['match_id'] ?? 'non défini'));
-error_log("titulaires présent : " . (isset($data['titulaires']) ? 'oui' : 'non'));
-error_log("remplacants présent : " . (isset($data['remplacants']) ? 'oui' : 'non'));
-
-if (!isset($data['match_id']) || !is_numeric($data['match_id']) || 
-    !isset($data['titulaires']) || !is_array($data['titulaires']) || 
-    !isset($data['remplacants']) || !is_array($data['remplacants'])) {
-    
+if (!isset($data['match_id']) || !is_numeric($data['match_id'])) {
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Données manquantes ou invalides',
-        'received' => $data,
-        'validation' => [
-            'match_id_exists' => isset($data['match_id']),
-            'match_id_numeric' => isset($data['match_id']) ? is_numeric($data['match_id']) : false,
-            'titulaires_exists' => isset($data['titulaires']),
-            'titulaires_array' => isset($data['titulaires']) ? is_array($data['titulaires']) : false,
-            'remplacants_exists' => isset($data['remplacants']),
-            'remplacants_array' => isset($data['remplacants']) ? is_array($data['remplacants']) : false
-        ]
-    ]);
+    echo json_encode(['success' => false, 'message' => 'ID du match manquant ou invalide']);
     exit;
 }
 
 try {
     $pdo->beginTransaction();
 
-    $match_id = intval($data['match_id']);
-
-    // Nettoyer les anciennes entrées
+    // Supprimer les anciennes entrées pour ce match
     $stmt = $pdo->prepare("DELETE FROM feuille_match WHERE match_id = ?");
-    $stmt->execute([$match_id]);
+    $stmt->execute([$data['match_id']]);
 
-    // Préparer la requête d'insertion
+    // Préparer la requête d'insertion sans la colonne poste
     $stmt = $pdo->prepare("
         INSERT INTO feuille_match (match_id, joueur_id, titulaire, remplacant) 
         VALUES (?, ?, ?, ?)
     ");
 
     // Insérer les titulaires
-    foreach ($data['titulaires'] as $joueurId) {
-        if (is_numeric($joueurId)) {
-            $stmt->execute([
-                $match_id,
-                intval($joueurId),
-                1,
-                0
-            ]);
-        }
+    foreach ($data['titulaires'] as $joueur) {
+        $stmt->execute([
+            $data['match_id'],
+            $joueur['joueur_id'],
+            $joueur['titulaire'],
+            $joueur['remplacant']
+        ]);
     }
 
     // Insérer les remplaçants
-    foreach ($data['remplacants'] as $joueurId) {
-        if (is_numeric($joueurId)) {
-            $stmt->execute([
-                $match_id,
-                intval($joueurId),
-                0,
-                1
-            ]);
-        }
+    foreach ($data['remplacants'] as $joueur) {
+        $stmt->execute([
+            $data['match_id'],
+            $joueur['joueur_id'],
+            $joueur['titulaire'],
+            $joueur['remplacant']
+        ]);
     }
 
     $pdo->commit();
-    echo json_encode([
-        'success' => true,
-        'message' => 'Composition sauvegardée avec succès'
-    ]);
+    echo json_encode(['success' => true, 'message' => 'Composition sauvegardée avec succès']);
 
 } catch (Exception $e) {
     $pdo->rollBack();

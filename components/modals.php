@@ -345,11 +345,11 @@ if (!isset($stats)) {
             </div>
             <div class="form-group">
                 <label for="taille">Taille (cm):</label>
-                <input type="number" id="taille" name="taille" min="0" max="300">
+                <input type="text" id="taille" name="taille" pattern="[0-9]+([.,][0-9]+)?" required>
             </div>
             <div class="form-group">
                 <label for="poids">Poids (kg):</label>
-                <input type="number" id="poids" name="poids" min="0" max="200">
+                <input type="text" id="poids" name="poids" pattern="[0-9]+([.,][0-9]+)?" required>
             </div>
             <div class="form-group">
                 <label for="statut">Statut:</label>
@@ -362,29 +362,23 @@ if (!isset($stats)) {
             </div>
             <div class="form-group">
                 <label for="poste_prefere">Poste préféré:</label>
-                <select id="poste_prefere" name="poste_prefere">
-                    <option value="Gardien">Gardien</option>
-                    <option value="Défenseur">Défenseur</option>
-                    <option value="Milieu">Milieu</option>
-                    <option value="Attaquant">Attaquant</option>
+                <select id="poste_prefere" name="poste_prefere" required>
+                    <option value="Pilier">Pilier</option>
+                    <option value="Talonneur">Talonneur</option>
+                    <option value="Deuxième ligne">Deuxième ligne</option>
+                    <option value="Troisième ligne">Troisième ligne</option>
+                    <option value="Demi de mêlée">Demi de mêlée</option>
+                    <option value="Demi d'ouverture">Demi d'ouverture</option>
+                    <option value="Centre">Centre</option>
+                    <option value="Ailier">Ailier</option>
+                    <option value="Arrière">Arrière</option>
                 </select>
             </div>
-
-            <!-- Section pour ajouter un commentaire -->
-            <h3>Commentaires</h3>
             <div class="form-group">
-                <textarea id="commentaire" name="commentaire" rows="4" required 
-                          style="width: 100%; resize: vertical;" 
-                          placeholder="Ajouter un commentaire..."></textarea>
+                <label for="commentaires">Commentaires (optionnel):</label>
+                <textarea id="commentaires" name="commentaires" rows="5" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background-color: #2b2b2b; color: #fff;"></textarea>
             </div>
-            <button type="button" class="btn-submit" onclick="posterCommentaire()">Ajouter un commentaire</button>
-
-            <!-- Liste des commentaires -->
-            <div id="listeCommentaires">
-                <ul id="commentaires"></ul>
-            </div>
-
-            <button type="submit" class="btn-submit">Enregistrer</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px;">Sauvegarder</button>
         </form>
     </div>
 </div>

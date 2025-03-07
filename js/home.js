@@ -68,8 +68,33 @@ function chargerCompositionMatch(matchId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                afficherJoueurs('score_titulaires', data.titulaires);
-                afficherJoueurs('score_remplacants', data.remplacants);
+                // Afficher les joueurs dans la modal de résultat
+                const titulairesContainer = document.getElementById('score_titulaires');
+                const remplacantsContainer = document.getElementById('score_remplacants');
+                
+                // Afficher les titulaires
+                titulairesContainer.innerHTML = '<h4>Titulaires</h4>';
+                data.titulaires.forEach(joueur => {
+                    const joueurElement = document.createElement('div');
+                    joueurElement.className = 'player-item';
+                    joueurElement.innerHTML = `
+                        <span class="player-name">${joueur.nom} ${joueur.prenom}</span>
+                        <span class="player-poste">${joueur.poste}</span>
+                    `;
+                    titulairesContainer.appendChild(joueurElement);
+                });
+
+                // Afficher les remplaçants
+                remplacantsContainer.innerHTML = '<h4>Remplaçants</h4>';
+                data.remplacants.forEach(joueur => {
+                    const joueurElement = document.createElement('div');
+                    joueurElement.className = 'player-item';
+                    joueurElement.innerHTML = `
+                        <span class="player-name">${joueur.nom} ${joueur.prenom}</span>
+                        <span class="player-poste">${joueur.poste}</span>
+                    `;
+                    remplacantsContainer.appendChild(joueurElement);
+                });
             }
         })
         .catch(error => console.error('Erreur:', error));
@@ -461,7 +486,16 @@ function ouvrirFeuilleMatch(match) {
     // Charger les joueurs disponibles
     chargerJoueursDisponibles(matchId);
     
+    // Charger la composition existante si disponible
+    chargerCompositionMatch(matchId);
+    
     modal.style.display = 'block';
+    
+    // Initialiser le drag and drop après l'affichage du modal
+    setTimeout(() => {
+        initializeDropZones();
+        verifierDragAndDrop();
+    }, 500);
 }
 
 function initializeDragAndDrop() {
@@ -523,31 +557,36 @@ function handleDrop(e) {
 function sauvegarderComposition() {
     const matchId = document.querySelector('#modalFeuilleMatch .modal-content').getAttribute('data-match-id');
     
-    // Fonction helper pour récupérer les joueurs d'une catégorie
-    const getJoueursFromCategory = (categoryId) => {
-        return [...document.getElementById(categoryId).children]
-            .filter(el => el.classList.contains('joueur-item'))
-            .map(el => el.dataset.joueurId);
-    };
-
-    // Récupérer tous les joueurs par catégorie
+    // Récupérer tous les joueurs des différentes zones
     const composition = {
         match_id: Number(matchId),
-        titulaires: {
-            premiere_ligne: getJoueursFromCategory('titulaires-premiere-ligne'),
-            deuxieme_ligne: getJoueursFromCategory('titulaires-deuxieme-ligne'),
-            troisieme_ligne: getJoueursFromCategory('titulaires-troisieme-ligne'),
-            demis: getJoueursFromCategory('titulaires-demis'),
-            trois_quarts: getJoueursFromCategory('titulaires-trois-quarts'),
-            arriere: getJoueursFromCategory('titulaires-arriere')
-        },
-        remplacants: {
-            premiere_ligne: getJoueursFromCategory('remplacants-premiere-ligne'),
-            deuxieme_ligne: getJoueursFromCategory('remplacants-deuxieme-ligne'),
-            troisieme_ligne: getJoueursFromCategory('remplacants-troisieme-ligne'),
-            backs: getJoueursFromCategory('remplacants-backs')
-        }
+        titulaires: [],
+        remplacants: []
     };
+
+    // Récupérer les titulaires de chaque poste
+    ['premiere-ligne', 'deuxieme-ligne', 'troisieme-ligne', 'demis', 'trois-quarts', 'arriere'].forEach(poste => {
+        const joueurs = [...document.getElementById(`titulaires-${poste}`).children]
+            .filter(el => el.classList.contains('joueur-item'))
+            .map(el => ({
+                joueur_id: Number(el.dataset.joueurId),
+                titulaire: 1,
+                remplacant: 0
+            }));
+        composition.titulaires.push(...joueurs);
+    });
+
+    // Récupérer les remplaçants
+    ['premiere-ligne', 'deuxieme-ligne', 'troisieme-ligne', 'backs'].forEach(poste => {
+        const joueurs = [...document.getElementById(`remplacants-${poste}`).children]
+            .filter(el => el.classList.contains('joueur-item'))
+            .map(el => ({
+                joueur_id: Number(el.dataset.joueurId),
+                titulaire: 0,
+                remplacant: 1
+            }));
+        composition.remplacants.push(...joueurs);
+    });
 
     // Vérifier les limites
     if (!verifierLimitesComposition(composition)) {
@@ -598,14 +637,14 @@ function verifierLimitesComposition(composition) {
 
     // Vérifier les titulaires
     for (const [poste, limite] of Object.entries(limites.titulaires)) {
-        if (composition.titulaires[poste].length > limite) {
+        if (composition.titulaires.filter(j => j.poste === poste).length > limite) {
             return false;
         }
     }
 
     // Vérifier les remplaçants
     for (const [poste, limite] of Object.entries(limites.remplacants)) {
-        if (composition.remplacants[poste].length > limite) {
+        if (composition.remplacants.filter(j => j.poste === poste).length > limite) {
             return false;
         }
     }
@@ -627,21 +666,32 @@ function chargerJoueursDisponibles(matchId) {
                     joueurElement.id = `joueur-${joueur.id}`;
                     joueurElement.setAttribute('draggable', true);
                     joueurElement.dataset.joueurId = joueur.id;
-                    joueurElement.dataset.poste = joueur.poste_prefere.toLowerCase().replace(' ', '-');
+                    joueurElement.dataset.poste = joueur.poste_prefere.toLowerCase().replace(/\s+/g, '-');
                     joueurElement.innerHTML = `
                         <span class="joueur-nom">${joueur.nom} ${joueur.prenom}</span>
                         <span class="joueur-poste">${joueur.poste_prefere}</span>
                     `;
                     
-                    joueurElement.addEventListener('dragstart', handleDragStart);
-                    joueurElement.addEventListener('dragend', handleDragEnd);
+                    // Ajouter les événements de drag and drop
+                    joueurElement.addEventListener('dragstart', function(e) {
+                        e.dataTransfer.setData('text/plain', this.id);
+                        this.classList.add('dragging');
+                    });
+                    
+                    joueurElement.addEventListener('dragend', function() {
+                        this.classList.remove('dragging');
+                    });
                     
                     container.appendChild(joueurElement);
                 });
 
                 // Initialiser le filtrage des joueurs
                 initializeMatchCategoryButtons();
+                
+                // Initialiser les zones de drop
                 initializeDropZones();
+                
+                console.log("Drag and drop initialisé pour les joueurs disponibles");
             }
         })
         .catch(error => console.error('Erreur:', error));
@@ -686,14 +736,12 @@ function matchPosteToCategory(poste, category) {
 }
 
 function initializeDropZones() {
-    const zones = ['joueursDisponibles', 'joueursTitulaires', 'joueursRemplacants'];
+    // Sélectionner toutes les zones de dépôt dans la feuille de match
+    const zones = document.querySelectorAll('.joueurs-list');
     
-    zones.forEach(zoneId => {
-        const zone = document.getElementById(zoneId);
-        if (zone) {
-            zone.addEventListener('dragover', handleDragOver);
-            zone.addEventListener('drop', handleDrop);
-        }
+    zones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('drop', handleDrop);
     });
 }
 
@@ -719,9 +767,15 @@ function handleDrop(e) {
     e.preventDefault();
     const joueurId = e.dataTransfer.getData('text/plain');
     const joueurElement = document.getElementById(joueurId);
-    const zoneDepot = e.target.closest('.joueurs-list');
+    
+    // Trouver la zone de dépôt la plus proche
+    let zoneDepot = e.target;
+    if (!zoneDepot.classList.contains('joueurs-list')) {
+        zoneDepot = e.target.closest('.joueurs-list');
+    }
     
     if (joueurElement && zoneDepot) {
+        // Vérifier les limites pour les titulaires et remplaçants
         if (zoneDepot.id === 'joueursTitulaires') {
             const nombreTitulaires = zoneDepot.querySelectorAll('.joueur-item').length;
             if (nombreTitulaires >= 15) {
@@ -733,6 +787,15 @@ function handleDrop(e) {
             const nombreRemplacants = zoneDepot.querySelectorAll('.joueur-item').length;
             if (nombreRemplacants >= 8) {
                 alert('Maximum 8 remplaçants atteint');
+                return;
+            }
+        }
+        // Vérifier les limites pour les postes spécifiques
+        else if (zoneDepot.hasAttribute('data-max')) {
+            const maxJoueurs = parseInt(zoneDepot.getAttribute('data-max'));
+            const nombreJoueurs = zoneDepot.querySelectorAll('.joueur-item').length;
+            if (nombreJoueurs >= maxJoueurs) {
+                alert(`Maximum ${maxJoueurs} joueur(s) atteint pour ce poste`);
                 return;
             }
         }
@@ -795,3 +858,50 @@ async function ajouterMatch(event) {
 }
 
 // ...existing code...
+
+// Fonction pour vérifier et réinitialiser le drag and drop
+function verifierDragAndDrop() {
+    console.log("Vérification du drag and drop...");
+    
+    // Vérifier si les éléments draggable sont correctement initialisés
+    const joueurs = document.querySelectorAll('.joueur-item');
+    joueurs.forEach(joueur => {
+        if (!joueur.getAttribute('draggable')) {
+            console.log("Réinitialisation de l'élément draggable:", joueur.id);
+            joueur.setAttribute('draggable', true);
+            
+            // Supprimer les anciens écouteurs d'événements pour éviter les doublons
+            joueur.removeEventListener('dragstart', handleDragStart);
+            joueur.removeEventListener('dragend', handleDragEnd);
+            
+            // Ajouter les nouveaux écouteurs d'événements
+            joueur.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', this.id);
+                this.classList.add('dragging');
+            });
+            
+            joueur.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+            });
+        }
+    });
+    
+    // Réinitialiser les zones de drop
+    initializeDropZones();
+}
+
+// Ajouter un bouton pour réinitialiser le drag and drop
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter un bouton de réinitialisation dans la feuille de match
+    const modalFeuilleMatch = document.getElementById('modalFeuilleMatch');
+    if (modalFeuilleMatch) {
+        const buttonsContainer = modalFeuilleMatch.querySelector('.buttons-container');
+        if (buttonsContainer) {
+            const resetButton = document.createElement('button');
+            resetButton.className = 'btn-secondary';
+            resetButton.textContent = 'Réinitialiser le drag and drop';
+            resetButton.onclick = verifierDragAndDrop;
+            buttonsContainer.appendChild(resetButton);
+        }
+    }
+});
