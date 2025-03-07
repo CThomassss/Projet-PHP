@@ -174,8 +174,8 @@ $stats['joueurs'] = getPlayerStats($pdo);
                             <?php 
                             if (!empty($joueurs)):
                                 foreach ($joueurs as $joueur): 
-                                    // Vérification des données nulles
-                                    $taille = !empty($joueur['taille']) ? $joueur['taille'] . ' cm' : 'Non renseigné';
+                                    // Vérification et formatage des données
+                                    $taille = !empty($joueur['taille']) ? number_format($joueur['taille'], 0) . ' cm' : 'Non renseigné';
                                     $poids = !empty($joueur['poids']) ? $joueur['poids'] . ' kg' : 'Non renseigné';
                                     $poste = !empty($joueur['poste_prefere']) ? $joueur['poste_prefere'] : 'Non renseigné';
                             ?>

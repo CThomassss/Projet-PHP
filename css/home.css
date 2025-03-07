@@ -68,6 +68,59 @@ a {
     color: inherit;
 }
 
+/* Styles pour les menus déroulants */
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--c-gray-600);
+    background: var(--c-gray-700);
+    color: var(--c-text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    appearance: none; /* Retire le style par défaut */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+select:hover {
+    background-color: var(--c-gray-600);
+}
+
+select:focus {
+    outline: none;
+    border-color: #8CBEB2;
+    box-shadow: 0 0 0 2px rgba(140, 190, 178, 0.2);
+}
+
+/* Style des options */
+option {
+    background-color: var(--c-gray-800);
+    color: var(--c-text-primary);
+    padding: 0.5rem;
+}
+
+option:hover {
+    background-color: var(--c-gray-600);
+}
+
+/* Style des groupes d'options */
+optgroup {
+    font-weight: bold;
+    background-color: var(--c-gray-900);
+    color: #8CBEB2;
+}
+
+/* Personnalisation spécifique pour le modal joueur */
+#modalJoueur select {
+    margin-bottom: 1rem;
+}
+
 /* ============================================
    3. LAYOUT PRINCIPAL
 ============================================ */
@@ -802,6 +855,31 @@ a {
 .joueur-item {
     cursor: grab;
     user-select: none;
+    background: var(--c-gray-700);
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.joueur-item:active {
+    cursor: grabbing;
+}
+
+.joueur-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    background: var(--c-gray-600);
+}
+
+.joueurs-list.drag-over {
+    background: var(--c-gray-600);
+    border: 2px dashed var(--c-text-primary);
+}
+
+.joueur-item {
+    cursor: grab;
+    user-select: none;
     background: var(--c-gray-800);
     padding: 0.75rem;
     margin-bottom: 0.5rem;
@@ -1392,4 +1470,9 @@ h2, h3 {
     overflow-y: auto;
     background: var(--c-gray-800);
     margin: 0;
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> 547820bf5c0368e562e5988519a94626cc6b410a

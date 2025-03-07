@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<link rel="stylesheet" href="/Projet%20PHP/css/login.css">
+<link rel="stylesheet" href="/css/login.css">
 <div class="login-container">
     <style>
         body {
@@ -100,3 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>Pas encore de compte ? <a href="signup.php">S'inscrire</a></p>
     </div>
 </div>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 547820bf5c0368e562e5988519a94626cc6b410a
