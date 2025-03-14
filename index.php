@@ -15,7 +15,7 @@
         }
     </style>
     <div class="container">
-        <h1>Bienvenue sur notre plateforme</h1>
+        <h1>Bienvenues sur notre plateforme</h1>
         
         <div class="app-description">
             <p>Cette application permet de gérer efficacement une équipe de rugby en facilitant :</p>
